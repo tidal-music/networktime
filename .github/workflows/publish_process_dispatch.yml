@@ -1,0 +1,36 @@
+name: Process release dispatch
+on:
+  push:
+    tags:
+      - '[1-9]+.[0-9]+.[0-9]+-dispatch'
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+concurrency:
+  group: ${{ github.ref_name }}
+jobs:
+  ensure-tag-is-on-main:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.1.6
+        with:
+          ref: main
+          fetch-depth: 0
+      - run: exit $(git merge-base --is-ancestor $GITHUB_REF_NAME HEAD)
+  update-xcframeworks-and-dispatch-publishing:
+    runs-on: macos-14-xlarge
+    needs: [ ensure-tag-is-on-main ]
+    permissions:
+      actions: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - run: |
+          git config --local user.name $GITHUB_ACTOR
+          git config --local user.email noreply@github.com
+      - run: |
+          set -e
+          TAG=$(echo $GITHUB_REF_NAME | tr -d -- -dispatch)
+          .scripts/github/update_xcframeworks.sh
+          git tag $TAG -m $TAG
+          git push origin tag $TAG
+          gh workflow run publish.yml --ref $TAG

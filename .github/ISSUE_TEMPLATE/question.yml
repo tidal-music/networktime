@@ -1,0 +1,8 @@
+name: Question
+description: If you have any doubts, just ask
+body:
+  - type: textarea
+    attributes:
+      label: Description
+    validations:
+      required: true

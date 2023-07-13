@@ -1,0 +1,48 @@
+name: Submit dependencies
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  networktime:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: ./.github/actions/submitDependencyReport
+        with:
+          module: networktime
+          github-token: ${{ github.token }}
+  networktime-singletons:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: ./.github/actions/submitDependencyReport
+        with:
+          module: networktime-singletons
+          github-token: ${{ github.token }}
+  samples-multiplatform-kotlin-android:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: ./.github/actions/submitDependencyReport
+        with:
+          module: samples-multiplatform-kotlin-android
+          github-token: ${{ github.token }}
+  samples-multiplatform-kotlin-jvm:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: ./.github/actions/submitDependencyReport
+        with:
+          module: samples-multiplatform-kotlin-jvm
+          github-token: ${{ github.token }}
+  samples-multiplatform-kotlin-shared:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: ./.github/actions/submitDependencyReport
+        with:
+          module: samples-multiplatform-kotlin-shared
+          github-token: ${{ github.token }}

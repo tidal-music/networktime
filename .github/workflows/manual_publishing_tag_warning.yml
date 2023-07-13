@@ -1,0 +1,12 @@
+name: Manual publishing tag warning
+on:
+  push:
+    tags:
+      - '[1-9]+.[0-9]+.[0-9]+'
+      - '![1-9]+.[0-9]+.[0-9]+-dispatch'
+jobs:
+  print-warning:
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Releases must be dispatched using .scripts/dispatch_release.sh"
+      - run: exit 1

@@ -1,0 +1,18 @@
+name: Bug Report
+description: Report a bug in the project
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Please include:**
+
+        * Clear reproduction steps.
+        * Frequency with which the steps above reproduce the bug (if not 100%).
+        * Expected result(s) of the reproduction steps, as well as the actual ones.
+
+        Detailed reports are more likely to be addressed faster.
+  - type: textarea
+    attributes:
+      label: Description
+    validations:
+      required: true

@@ -1,0 +1,35 @@
+[versions]
+androidx-activity = "1.8.0"
+android-build = "8.3.0"
+androidx-compose-bom = "2023.03.00"
+compose = "1.6.10"
+kotlin = "2.0.0"
+kotlinx-atomicfu = "0.24.0"
+kotlinx-coroutines-core = "1.7.3"
+kotlinx-datetime = "0.4.1"
+kotlinx-serialization-json-okio = "1.6.1"
+okio = "3.6.0"
+vanniktech-publish = "0.28.0"
+
+[libraries]
+androidx-activity-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidx-compose-bom" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "kotlinx-atomicfu" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-serialization-json-okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "kotlinx-serialization-json-okio" }
+plugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+plugin-vanniktech-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktech-publish" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-build" }
+buildlogic-kotlin-multiplatform-library = { id = "buildlogic.kotlin.multiplatform.library", version = "unspecified" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+kotlin-atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-publish" }

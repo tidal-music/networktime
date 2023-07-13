@@ -1,0 +1,37 @@
+name: Submit dependencies
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  library:
+    runs-on: macos-14-xlarge
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: actions/setup-java@v3.9.0
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - run: .scripts/dependency_report_generate.sh -m library -c allSourceSetsCompileDependenciesMetadata > dependencies_library_raw
+      - run: .scripts/github/dependency_report_as_github_json.sh -i dependencies_library_raw -n library -s $(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ") -l library/build.gradle.kts > dependencies_library.github.json
+      - run: |
+          echo RESPONSE_CODE=$(curl -L \
+           -X POST \
+           -H "Accept: application/vnd.github+json" \
+           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+           -H "X-GitHub-Api-Version: 2022-11-28" \
+           https://api.github.com/repos/$GITHUB_REPOSITORY/dependency-graph/snapshots \
+           --data-binary "@dependencies_library.github.json" \
+           -o /dev/null \
+           -w '%{http_code}') >> $GITHUB_ENV
+      - run: |
+          if [[ "$RESPONSE_CODE" == "201" ]];
+          then
+            exit 0
+          else
+            echo "Dependency submission failed with HTTP code $RESPONSE_CODE"
+            exit 1
+          fi

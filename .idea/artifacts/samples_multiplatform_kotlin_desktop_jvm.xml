@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="samples-multiplatform-kotlin-desktop-jvm">
+    <output-path>$PROJECT_DIR$/samples/multiplatform-kotlin/desktop/build/libs</output-path>
+    <root id="archive" name="samples-multiplatform-kotlin-desktop-jvm.jar">
+      <element id="module-output" name="network-time.samples-multiplatform-kotlin-desktop.jvmMain" />
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,60 @@
+name: Publish
+on:
+  push:
+    tags:
+      - '**'
+permissions:
+  contents: write
+  packages: write
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  ensure-tag-is-on-main:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3.5.3
+        with:
+          ref: main
+          fetch-depth: 0
+      - run: exit $(git merge-base --is-ancestor $GITHUB_REF_NAME HEAD)
+  create-github-release:
+    runs-on: ubuntu-22.04
+    needs: [ ensure-tag-is-on-main ]
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - run: .scripts/github/release.sh > upload_url
+      - uses: actions/upload-artifact@v4.3.1
+        with:
+          name: upload_url
+          path: upload_url
+  jvm-maven-github:
+    runs-on: macos-14-xlarge
+    needs: [ ensure-tag-is-on-main ]
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: ./.github/actions/runGradleTask
+        with:
+          preTaskString: -Pversion=$GITHUB_REF_NAME
+          task: library:publishKotlinMultiplatformPublicationToGithubPackagesRepository
+  attach-xcframework-to-github-release:
+    runs-on: macos-14-xlarge
+    needs: [ create-github-release ]
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: ./.github/actions/runGradleTask
+        with:
+          task: :library:assembleLibraryReleaseXCFramework
+      - run: zip -r Library.xcframework.zip library/build/XCFrameworks/release/library.xcframework
+      - uses: actions/download-artifact@v4.1.4
+        with:
+          name: upload_url
+      - run: echo UPLOAD_URL=$(cat upload_url | sed "s/{?name,label}/?name=Library-${GITHUB_REF_NAME}.xcframework.zip/") >> $GITHUB_ENV
+      - run: |
+          curl -s \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@Library.xcframework.zip" \
+            $UPLOAD_URL

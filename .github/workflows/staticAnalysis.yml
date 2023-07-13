@@ -1,0 +1,29 @@
+name: Static analysis
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  ktlint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - run: .scripts/check_ktlint.sh
+  codeql:
+    runs-on: macos-14-xlarge
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: github/codeql-action/init@v2.21.3
+        with:
+          languages: kotlin
+      - uses: ./.github/actions/runGradleTask
+        with:
+          task: build
+      - uses: github/codeql-action/analyze@v2.21.3
+        with:
+          category: "/language:kotlin"
+

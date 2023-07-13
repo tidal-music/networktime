@@ -1,0 +1,13 @@
+name: Build
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  root:
+    runs-on: macos-14-xlarge
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: ./.github/actions/runGradleTask
+        with:
+          task: build

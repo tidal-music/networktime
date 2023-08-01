@@ -1,0 +1,16 @@
+#!/bin/bash
+
+runAndReportIfError() {
+  EXIT_CODE=$("${@:2}" > "${1}")
+  if [ "$EXIT_CODE" -ne "0" ]; then
+    cat "${1}"
+    exit "$EXIT_CODE"
+  fi
+}
+export -f runAndReportIfError
+
+REPORT_DIR="out/pre-commit"
+rm -rf $REPORT_DIR || true
+mkdir -p ${REPORT_DIR}
+
+parallel --halt now,done=1 ::: "runAndReportIfError ${REPORT_DIR}/ktlint.log ./.scripts/check_ktlint.sh"

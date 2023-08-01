@@ -1,0 +1,8 @@
+name: Static analysis
+on: push
+jobs:
+  ktlint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - run: .scripts/check_ktlint.sh

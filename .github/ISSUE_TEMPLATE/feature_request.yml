@@ -1,5 +1,5 @@
 name: Feature request
-description: Request some new functionality
+description: Request new functionality
 body:
   - type: textarea
     attributes:

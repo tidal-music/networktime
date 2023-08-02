@@ -9,7 +9,7 @@ runAndReportIfError() {
 }
 export -f runAndReportIfError
 
-REPORT_DIR="out/pre-commit"
+REPORT_DIR="build/pre-commit"
 rm -rf $REPORT_DIR || true
 mkdir -p ${REPORT_DIR}
 

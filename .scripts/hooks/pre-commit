@@ -1,10 +1,11 @@
 #!/bin/bash
 
 runAndReportIfError() {
-  EXIT_CODE=$("${@:2}" > "${1}")
-  if [ "$EXIT_CODE" -ne "0" ]; then
-    cat "${1}"
-    exit "$EXIT_CODE"
+  "${@:2}" > "${1}"
+  EXIT_CODE=$?
+  if [ $EXIT_CODE -ne 0 ]; then
+    cat >&2 "${1}"
+    return $EXIT_CODE
   fi
 }
 export -f runAndReportIfError

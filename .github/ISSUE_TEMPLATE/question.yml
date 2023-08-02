@@ -1,4 +1,5 @@
 name: Question
+description: If you have any doubts, just ask
 body:
   - type: textarea
     attributes:

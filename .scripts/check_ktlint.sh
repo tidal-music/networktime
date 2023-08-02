@@ -2,7 +2,7 @@
 set -e
 
 KTLINT_VERSION="0.50.0"
-TARGET="out/ktlint-$KTLINT_VERSION/ktlint"
+TARGET="build/ktlint-$KTLINT_VERSION/ktlint"
 
 if [ ! -f "$TARGET" ]; then
   mkdir -p "$(dirname "$TARGET")"

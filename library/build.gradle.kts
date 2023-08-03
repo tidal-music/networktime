@@ -9,28 +9,40 @@ kotlin {
   targetHierarchy.default()
 
   jvm()
-  androidTarget()
-  ios()
-  linuxX64()
-  macosX64()
-  macosArm64()
-  iosSimulatorArm64()
-  iosX64()
-  linuxArm64()
-  watchosSimulatorArm64()
-  watchosX64()
-  watchosArm32()
-  watchosArm64()
-  tvosSimulatorArm64()
-  tvosX64()
-  tvosArm64()
-  iosArm64()
+  androidTarget {
+    compilations.all {
+      kotlinOptions {
+        jvmTarget = "1.8"
+      }
+    }
+  }
   androidNativeArm32()
   androidNativeArm64()
   androidNativeX86()
   androidNativeX64()
-  mingwX64()
-  watchosDeviceArm64()
+  listOf(
+    macosX64(),
+    macosArm64(),
+    iosX64(),
+    watchosSimulatorArm64(),
+    watchosX64(),
+    watchosArm32(),
+    watchosArm64(),
+    tvosSimulatorArm64(),
+    tvosX64(),
+    tvosArm64(),
+    iosArm64(),
+    watchosDeviceArm64(),
+  ).forEach {
+    it.binaries.framework {
+      baseName = project.name
+    }
+  }
+  js(IR) {
+    browser()
+    nodejs()
+    binaries.executable()
+  }
 
   sourceSets {
     val commonMain by getting {
@@ -42,9 +54,9 @@ kotlin {
 }
 
 android {
-  compileSdk = 34
+  compileSdk = 33
   defaultConfig {
     minSdk = 1
   }
-  namespace = group.toString()
+  namespace = "com.tidal.networktime"
 }

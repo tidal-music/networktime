@@ -31,4 +31,20 @@ kotlin {
   androidNativeX64()
   mingwX64()
   watchosDeviceArm64()
+
+  sourceSets {
+    val commonMain by getting {
+      dependencies {
+        api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+      }
+    }
+  }
+}
+
+android {
+  compileSdk = 34
+  defaultConfig {
+    minSdk = 1
+  }
+  namespace = group.toString()
 }

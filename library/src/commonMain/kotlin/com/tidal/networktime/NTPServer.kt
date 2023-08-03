@@ -11,18 +11,19 @@ sealed interface NTPServer {
   sealed interface Unicast : NTPServer {
     class Sequential(
       override val hostName: String,
-      override val responseTimeout: Duration = 5.seconds,
+      override val responseTimeout: Duration = RESPONSE_TIMEOUT_DEFAULT_SECONDS.seconds,
       override val dnsResolutionStrategy: DNSResolutionStrategy = DNSResolutionStrategy.ALL,
       val outgoingRequestGap: Duration = OUTGOING_REQUEST_GAP_DEFAULT_SECONDS.seconds,
     ) : Unicast
 
     class Concurrent(
       override val hostName: String,
-      override val responseTimeout: Duration = 5.seconds,
+      override val responseTimeout: Duration = RESPONSE_TIMEOUT_DEFAULT_SECONDS.seconds,
       override val dnsResolutionStrategy: DNSResolutionStrategy = DNSResolutionStrategy.ALL,
     ) : Unicast
 
     companion object {
+      private const val RESPONSE_TIMEOUT_DEFAULT_SECONDS = 5
       private const val OUTGOING_REQUEST_GAP_DEFAULT_SECONDS = 2
     }
   }

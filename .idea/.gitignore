@@ -9,3 +9,6 @@
 # Gradle auto-import
 *.iml
 modules.xml
+gradle.xml
+usage.statistics.xml
+libraries.xml

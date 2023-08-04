@@ -1,0 +1,10 @@
+name: Build
+on: push
+jobs:
+  root:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: ./.github/actions/runGradleTask
+        with:
+          task: build

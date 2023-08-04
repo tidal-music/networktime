@@ -15,3 +15,4 @@ rm -rf $REPORT_DIR || true
 mkdir -p ${REPORT_DIR}
 
 parallel --halt now,done=1 ::: "runAndReportIfError ${REPORT_DIR}/ktlint.log ./.scripts/check_ktlint.sh"
+parallel --halt now,done=1 ::: "./gradlew clean build"

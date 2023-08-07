@@ -1,6 +1,7 @@
 package com.tidal.networktime
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -17,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 class SNTPClient(
   vararg val ntpServers: NTPServer,
-  val coroutineScope: CoroutineScope,
+  val coroutineScope: CoroutineScope = GlobalScope,
   val referenceClock: () -> Duration,
   val syncInterval: Duration = 64.seconds,
 ) {

@@ -16,10 +16,6 @@ kotlin {
       }
     }
   }
-  androidNativeArm32()
-  androidNativeArm64()
-  androidNativeX86()
-  androidNativeX64()
   listOf(
     macosX64(),
     macosArm64(),

@@ -1,13 +1,36 @@
 #!/bin/bash
-set -e
 
 REPORT_DIR="build/pre-commit"
 rm -rf $REPORT_DIR || true
 mkdir -p ${REPORT_DIR}
 
-BUILD_TASK_FILE=${REPORT_DIR}/build.log
-./gradlew build >> $BUILD_TASK_FILE || (cat $BUILD_TASK_FILE && exit 1) &
-KTLINT_TASK_FILE=${REPORT_DIR}/ktlint.log
-./.scripts/check_ktlint.sh >> $KTLINT_TASK_FILE || (cat $KTLINT_TASK_FILE && exit 1)
+PIDSTOOUTPUTFILES=()
+TASK_FILE_BUILD=${REPORT_DIR}/build.log
+./gradlew build > $TASK_FILE_BUILD 2>&1 &
+PIDSTOOUTPUTFILES+=("$!:$TASK_FILE_BUILD")
 
-wait
+TASK_FILE_KTLINT=${REPORT_DIR}/ktlint.log
+./.scripts/check_ktlint.sh > $TASK_FILE_KTLINT 2>&1 &
+PIDSTOOUTPUTFILES+=("$!:$TASK_FILE_KTLINT")
+
+while [[ $(jobs -p) ]]
+do
+  INDEX=-1
+  for PIDTOOUTPUTFILE in "${PIDSTOOUTPUTFILES[@]}"; do
+    INDEX=$INDEX+1
+    PID=${PIDTOOUTPUTFILE%%:*}
+    if ! ps -p "$PID" > /dev/null
+    then
+      if wait "$PID"; then
+        unset 'PIDSTOOUTPUTFILES[$INDEX]'
+        PIDSTOOUTPUTFILES=("${PIDSTOOUTPUTFILES[@]}")
+        continue
+      else
+        jobs -p | xargs kill
+        cat "${PIDTOOUTPUTFILE#*:}"
+        exit 1
+      fi
+    fi
+  done
+  sleep 1
+done

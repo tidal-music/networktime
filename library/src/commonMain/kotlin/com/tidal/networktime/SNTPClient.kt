@@ -1,5 +1,6 @@
 package com.tidal.networktime
 
+import com.tidal.networktime.internal.PlatformAgnosticSNTPClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlin.time.Duration
@@ -14,28 +15,33 @@ import kotlin.time.Duration.Companion.seconds
  * information obtained from [ntpServers]. May optionally implement [WriteableClock] to be adjusted
  * on every synchronization with the calculated time difference.
  * @param coroutineScope The scope where synchronization will run on.
- * @param syncInterval The amount of time to wait between a sync finishing and the next one being
- * started.
+ * @param synchronizationInterval The amount of time to wait between a sync finishing and the next
+ * one being started.
  */
 class SNTPClient(
   vararg val ntpServers: NTPServer,
   val referenceClock: ReadableClock,
   val coroutineScope: CoroutineScope = GlobalScope,
-  val syncInterval: Duration = 64.seconds,
+  val synchronizationInterval: Duration = 64.seconds,
 ) {
+  private val delegate = PlatformAgnosticSNTPClient(
+    ntpServers,
+    referenceClock,
+    coroutineScope,
+    synchronizationInterval,
+  )
 
-  val synchronizedEpochTime: Duration?
-    get() = TODO("Getting the time")
+  val synchronizedEpochTime by delegate::synchronizedEpochTime
 
   /**
    * Starts periodic synchronization. If it's already started, it does nothing. Otherwise, it
-   * requests an immediate dispatch of a synchronization and subsequent ones [syncInterval] after
-   * each other.
+   * requests an immediate dispatch of a synchronization and subsequent ones
+   * [synchronizationInterval] after each other.
    */
-  fun startSynchronization(): Unit = TODO("Start or return")
+  fun startSynchronization() = delegate.startSynchronization()
 
   /**
    * Stops periodic synchronization if already started, does nothing otherwise.
    */
-  fun stopSynchronization(): Unit = TODO("Stop or return")
+  fun stopSynchronization() = delegate.stopSynchronization()
 }

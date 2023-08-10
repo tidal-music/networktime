@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="JavaScriptLibraryMappings">
-    <excludedPredefinedLibrary name="network-time/build/js/node_modules" />
-    <excludedPredefinedLibrary name="network-time/build/js/packages/network-time-library-test/node_modules" />
-    <excludedPredefinedLibrary name="network-time/build/js/packages/network-time-library/node_modules" />
-  </component>
-</project>

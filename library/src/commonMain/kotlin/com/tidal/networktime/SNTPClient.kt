@@ -3,6 +3,7 @@ package com.tidal.networktime
 import com.tidal.networktime.internal.PlatformAgnosticSNTPClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -31,17 +32,25 @@ class SNTPClient(
     synchronizationInterval,
   )
 
+  /**
+   * The most recently calculated synchronized epoch time if it has been calculated at least once,
+   * or null otherwise.
+   */
   val synchronizedEpochTime by delegate::synchronizedEpochTime
 
   /**
    * Starts periodic synchronization. If it's already started, it does nothing. Otherwise, it
    * requests an immediate dispatch of a synchronization and subsequent ones
    * [synchronizationInterval] after each other.
+   *
+   * @return The [Job] for the task that will make the requested synchronization activity update.
    */
-  fun startSynchronization() = delegate.startSynchronization()
+  fun enableSynchronization() = delegate.enableSynchronization()
 
   /**
    * Stops periodic synchronization if already started, does nothing otherwise.
+   *
+   * @return The [Job] for the task that will make the requested synchronization activity update.
    */
-  fun stopSynchronization() = delegate.stopSynchronization()
+  fun disableSynchronization() = delegate.disableSynchronization()
 }

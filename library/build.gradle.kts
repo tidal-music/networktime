@@ -29,10 +29,6 @@ kotlin {
       baseName = project.name
     }
   }
-  js(IR) {
-    browser()
-    nodejs()
-  }
 
   sourceSets {
     val versionKtor = "2.3.3"
@@ -51,11 +47,6 @@ kotlin {
     val appleMain by getting {
       dependencies {
         implementation("io.ktor:ktor-client-darwin:$versionKtor")
-      }
-    }
-    val jsMain by getting {
-      dependencies {
-        implementation("io.ktor:ktor-client-js:$versionKtor")
       }
     }
   }

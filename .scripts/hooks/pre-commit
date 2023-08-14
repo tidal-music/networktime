@@ -24,7 +24,6 @@ do
       if wait "$PID"; then
         unset 'PIDSTOOUTPUTFILES[$INDEX]'
         PIDSTOOUTPUTFILES=("${PIDSTOOUTPUTFILES[@]}")
-        continue
       else
         jobs -p | xargs kill
         cat "${PIDTOOUTPUTFILE#*:}"

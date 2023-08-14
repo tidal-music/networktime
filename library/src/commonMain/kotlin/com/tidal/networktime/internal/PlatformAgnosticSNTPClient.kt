@@ -10,13 +10,13 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 internal class PlatformAgnosticSNTPClient(
-  val ntpServers: Array<out NTPServer>,
-  val referenceClock: ReadableClock,
-  val coroutineScope: CoroutineScope,
-  val synchronizationInterval: Duration = 64.seconds,
+  private val ntpServers: Array<out NTPServer>,
+  private val referenceClock: ReadableClock,
+  private val coroutineScope: CoroutineScope,
+  private val syncInterval: Duration = 64.seconds,
   private val httpClient: HttpClient = HttpClientFactory()(),
   private val operationCoordinator: OperationCoordinator =
-    OperationCoordinator(MutableState(), coroutineScope, Dispatchers.IO),
+    OperationCoordinator(MutableState(), coroutineScope, Dispatchers.IO, syncInterval),
 ) {
   val synchronizedEpochTime: Duration?
     get() = TODO("Get the time")

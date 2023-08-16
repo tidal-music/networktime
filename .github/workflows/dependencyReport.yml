@@ -1,0 +1,16 @@
+name: Submit dependencies
+on:
+  push:
+    branches:
+      - main
+jobs:
+  root:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: mikepenz/gradle-dependency-submission@v0.9.0
+        with:
+          gradle-build-module: :library
+          gradle-build-configuration: allSourceSetsCompileDependenciesMetadata
+          sub-module-mode: INDIVIDUAL_DEEP
+          fail-on-error: true

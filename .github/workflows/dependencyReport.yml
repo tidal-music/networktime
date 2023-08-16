@@ -1,8 +1,5 @@
 name: Submit dependencies
-on:
-  push:
-    branches:
-      - main
+on: push
 jobs:
   root:
     runs-on: ubuntu-22.04

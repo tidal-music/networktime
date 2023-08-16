@@ -2,7 +2,7 @@
 
 REPORT_DIR="build/pre-commit"
 rm -rf $REPORT_DIR || true
-mkdir -p ${REPORT_DIR}
+mkdir -p $REPORT_DIR
 
 PIDSTOOUTPUTFILES=()
 TASK_FILE_BUILD=${REPORT_DIR}/build.log

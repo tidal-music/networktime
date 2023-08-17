@@ -7,16 +7,14 @@ mkdir -p $DIR_TMP
 
 print_usage()
 {
-  echo "Usage: $0 -m <module> -c <configuration> -o <output_file>"
+  echo "Usage: $0 -m <module> -c <configuration>"
 }
 
-while getopts ":m:c:o:" OPT; do
+while getopts ":m:c:" OPT; do
   case $OPT in
     m) MODULE="$OPTARG"
     ;;
     c) CONFIGURATION="$OPTARG"
-    ;;
-    o) FILE_OUTPUT="$OPTARG"
     ;;
     ?) print_usage
        exit 1
@@ -41,4 +39,4 @@ for DEPENDENCY in "${RESOLVED[@]}"
 do
   echo "$DEPENDENCY" >> $FILE_TMP
 done
-sort -u $FILE_TMP > "$FILE_OUTPUT"
+sort -u $FILE_TMP

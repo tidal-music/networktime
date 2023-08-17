@@ -10,5 +10,5 @@ jobs:
           distribution: temurin
           java-version: 17
           cache: gradle
-      - run: .scripts/dependency_report_generate.sh -m library -c allSourceSetsCompileDependenciesMetadata -o dependencies_library_raw
+      - run: .scripts/dependency_report_generate.sh -m library -c allSourceSetsCompileDependenciesMetadata > dependencies_library_raw
       - run: echo "SCANNED_AT=$(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV

@@ -21,6 +21,15 @@ while getopts ":m:c:" OPT; do
     ;;
   esac
 done
+if [ -z "${MODULE+x}" ]; then
+  print_usage
+  exit 1
+fi
+if [ -z "${CONFIGURATION+x}" ]; then
+  print_usage
+  exit 1
+fi
+
 
 read -r -d '' -a WITH_ADJUSTED < <(./gradlew --console=plain "$MODULE":dependencies --configuration "$CONFIGURATION" |  grep --color=never -o "\S*:.*:.*" |  grep --color=never -v "/" |  awk 'NR > 1' |  tr -d " (*)" && printf '\0' )
 

@@ -37,14 +37,14 @@ if [ -z "${SCANNED_AT+x}" ]; then
 fi
 
 JSON=$(jq --null-input \
---argjson VERSION 1 \
+--argjson VERSION 0 \
 --arg SHA "$GITHUB_SHA" \
 --arg REF "$GITHUB_REF" \
 --arg CORRELATOR "$GITHUB_WORKFLOW"_"$GITHUB_JOB" \
 --arg RUN_ID "$GITHUB_RUN_ID" \
 --arg HTML_URL "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
 --arg DETECTOR_NAME "$GITHUB_REPOSITORY" \
---arg DETECTOR_VERSION 1 \
+--arg DETECTOR_VERSION 0 \
 --arg DETECTOR_URL "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
 --arg SCANNED "$SCANNED_AT" \
 --arg MANIFEST_NAME "$MANIFEST_NAME" \
@@ -76,7 +76,7 @@ JSON=$(jq --null-input \
 
 for LINE in $(cat $INPUT_FILE)
 do
-  JSON=$(jq '.manifests.'$MANIFEST_NAME'.resolved += {"'$LINE'": {}}' <<< $JSON)
+  JSON=$(jq '.manifests.'$MANIFEST_NAME'.resolved += {"'$LINE'": {"package_url": "pkg:/maven/'$LINE'"}}' <<< $JSON)
 done
 
 jq -r tostring <<< $JSON

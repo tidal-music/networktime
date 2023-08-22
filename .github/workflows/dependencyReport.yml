@@ -16,7 +16,7 @@ jobs:
           java-version: 17
           cache: gradle
       - run: .scripts/dependency_report_generate.sh -m library -c allSourceSetsCompileDependenciesMetadata > dependencies_library_raw
-      - run: .scripts/github/dependency_report_as_github_json.sh -i dependencies_library_raw -n library -s $(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ") > dependencies_library.github.json
+      - run: .scripts/github/dependency_report_as_github_json.sh -i dependencies_library_raw -n library -s $(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ") -l library/build.gradle.kts > dependencies_library.github.json
       - run: |
           echo RESPONSE_CODE=$(curl -L \
            -X POST \

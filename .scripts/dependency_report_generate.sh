@@ -30,7 +30,7 @@ if [ -z "${CONFIGURATION+x}" ]; then
   exit 1
 fi
 
-read -r -d '' -a WITH_ADJUSTED < <(./gradlew --console=plain "$MODULE":dependencies --configuration "$CONFIGURATION" |  grep --color=never -o "\S*:.*:.*" |  grep --color=never -v "/" |  awk 'NR > 1' |  tr -d " (*)" && printf '\0' )
+read -r -d '' -a WITH_ADJUSTED < <(./gradlew --console=plain "$MODULE":dependencies --configuration "$CONFIGURATION" |  grep --color=never -o "\S*:.*:.*" |  grep --color=never -v "/" | fgrep --color=never -v "$MODULE:dependencies" |  awk 'NR > 1' |  tr -d " (*)" && printf '\0' )
 
 RESOLVED=()
 REGEX_PATTERN_DEPENDENCY_WITH_VERSION_UPGRADED='.*:.*:.*->.*'

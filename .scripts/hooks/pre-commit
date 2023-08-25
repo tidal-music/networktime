@@ -13,7 +13,7 @@ TASK_FILE_KTLINT=${REPORT_DIR}/ktlint.log
 ./.scripts/check_ktlint.sh > $TASK_FILE_KTLINT 2>&1 &
 PIDSTOOUTPUTFILES+=("$!:$TASK_FILE_KTLINT")
 
-while [[ $(jobs -p) ]]
+while :
 do
   INDEX=-1
   for PIDTOOUTPUTFILE in "${PIDSTOOUTPUTFILES[@]}"; do
@@ -24,6 +24,9 @@ do
       if wait "$PID"; then
         unset 'PIDSTOOUTPUTFILES[$INDEX]'
         PIDSTOOUTPUTFILES=("${PIDSTOOUTPUTFILES[@]}")
+        if [ ${#PIDSTOOUTPUTFILES[@]} -eq 0 ]; then
+            exit 0
+        fi
       else
         jobs -p | xargs kill
         cat "${PIDTOOUTPUTFILE#*:}"

@@ -29,19 +29,4 @@ class NTPServer(
   val waitBetweenResolvedAddressQueries: Duration = 2.seconds,
   val pinnedPortNumber: Int? = null,
   val ntpVersion: NTPVersion = NTPVersion.FOUR,
-) {
-
-  enum class DNSLookupStrategy {
-    IP_V4,
-    IP_V6,
-    ALL,
-  }
-
-  enum class NTPVersion(val descriptor: Short) {
-    ZERO(0),
-    ONE(1),
-    TWO(2),
-    THREE(3),
-    FOUR(4),
-  }
-}
+)

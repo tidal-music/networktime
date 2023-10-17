@@ -24,7 +24,7 @@ class NTPServer(
   val name: String,
   val lookupTimeout: Duration = 3.seconds,
   val queryTimeout: Duration = 5.seconds,
-  val dnsLookupStrategy: DNSLookupStrategy = DNSLookupStrategy.ALL,
+  val dnsLookupStrategy: DnsLookupStrategy = DnsLookupStrategy.ALL,
   val queriesPerResolvedAddress: Short = 3,
   val waitBetweenResolvedAddressQueries: Duration = 2.seconds,
   val pinnedPortNumber: Int? = null,

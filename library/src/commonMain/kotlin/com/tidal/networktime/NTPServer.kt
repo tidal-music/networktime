@@ -6,10 +6,10 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Describes a host name that can resolve to any number of NTP unicast servers.
  *
- * @param hostName The host name.
+ * @param name The host name.
  * @param lookupTimeout The timeout for DNS lookup over HTTPs.
- * @param queryTimeout The timeout for receiving responses from servers resolved from [hostName].
- * @param dnsLookupStrategy Can be used for filtering resolved address on [hostName] based on
+ * @param queryTimeout The timeout for receiving responses from servers resolved from [name].
+ * @param dnsLookupStrategy Can be used for filtering resolved address on [name] based on
  * IP version.
  * @param queriesPerResolvedAddress The amount of queries to perform to each resolved address. More
  * queries may or may not increase precision, but they will make synchronization take longer and
@@ -21,7 +21,7 @@ import kotlin.time.Duration.Companion.seconds
  * @param ntpVersion The version number to write in packets.
  */
 class NTPServer(
-  val hostName: String,
+  val name: String,
   val lookupTimeout: Duration = 3.seconds,
   val queryTimeout: Duration = 5.seconds,
   val dnsLookupStrategy: DNSLookupStrategy = DNSLookupStrategy.ALL,

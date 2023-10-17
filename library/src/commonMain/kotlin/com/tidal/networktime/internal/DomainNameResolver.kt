@@ -11,25 +11,24 @@ internal class DomainNameResolver(
   private val httpClient: HttpClient,
   private val dnsOverHttpsResponseParser: DnsOverHttpsResponseParser,
 ) {
-
   suspend operator fun invoke(
-    address: String,
-    vararg dnsResourceRecords: String,
+    name: String,
+    dnsResourceRecords: Iterable<DnsResourceRecord>,
   ): Iterable<String> = dnsResourceRecords.map {
     withContext(currentCoroutineContext()) {
-      async { invoke(address, it) }
+      async { invoke(name, it) }
     }
   }.flatMap { it.await() }
 
   private tailrec suspend operator fun invoke(
-    address: String,
-    dnsResourceRecord: String,
+    name: String,
+    dnsResourceRecord: DnsResourceRecord,
   ): Iterable<String> = with(
     httpClient.get("https://dns.google/resolve") {
       url {
-        parameters.append("type", dnsResourceRecord)
+        parameters.append("type", dnsResourceRecord.type)
         parameters.append("ct", "application/x-javascript")
-        parameters.append("name", address)
+        parameters.append("name", name)
       }
     },
   ) {
@@ -41,13 +40,5 @@ internal class DomainNameResolver(
       in arrayOf(400, 413, 414, 415, 429, 500, 501, 502) -> emptySet()
       else -> invoke(headers["Location"]!!, dnsResourceRecord)
     }
-  }
-
-  companion object {
-    // IPv4
-    private const val DNS_RESOURCE_RECORD_A = "1"
-
-    // IPv6
-    const val DNS_RESOURCE_RECORD_AAAA = "28"
   }
 }

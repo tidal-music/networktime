@@ -6,7 +6,6 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 
 internal class DnsOverHttpsResponseParser {
-
   operator fun invoke(response: String): Iterable<String> {
     val responseAsJson = try {
       Json.parseToJsonElement(response).jsonObject

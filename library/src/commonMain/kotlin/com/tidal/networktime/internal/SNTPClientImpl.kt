@@ -10,7 +10,7 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class SNTPClientImpl(
   ntpServers: Array<out NTPServer>,
-  referenceClock: ReadableClock,
+  private val referenceClock: ReadableClock,
   coroutineScope: CoroutineScope,
   syncInterval: Duration = 64.seconds,
   private val mutableState: MutableState = MutableState(),
@@ -27,7 +27,11 @@ internal class SNTPClientImpl(
       ntpServers.asIterable(),
     ),
 ) {
-  val synchronizedEpochTime by mutableState::synchronizedEpochTime
+  val epochTime: Duration?
+    get() {
+      val (synchronizedTime, synchronizedAt) = mutableState.synchronizationResult ?: return null
+      return synchronizedTime - synchronizedAt + referenceClock.epochTime
+    }
 
   fun enableSynchronization() = operationCoordinator.dispatchStartSync()
 

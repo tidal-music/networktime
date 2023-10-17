@@ -32,10 +32,11 @@ class SNTPClient(
   )
 
   /**
-   * The most recently calculated synchronized epoch time if it has been calculated at least once,
-   * or null otherwise.
+   * The calculated epoch time if it has been calculated at least once or null otherwise. Accuracy
+   * may vary depending on time since the last successful synchronization and accuracy of the
+   * provided [referenceClock].
    */
-  val synchronizedEpochTime by delegate::synchronizedEpochTime
+  val epochTime by delegate::epochTime
 
   /**
    * Starts periodic synchronization. If it's already started, it does nothing. Otherwise, it

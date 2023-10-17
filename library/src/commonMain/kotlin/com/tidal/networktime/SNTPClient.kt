@@ -1,6 +1,6 @@
 package com.tidal.networktime
 
-import com.tidal.networktime.internal.PlatformAgnosticSNTPClient
+import com.tidal.networktime.internal.SNTPClientImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -13,8 +13,7 @@ import kotlin.time.Duration.Companion.seconds
  *
  * @param ntpServers Representation of supported unicast NTP sources.
  * @param referenceClock A provider of UNIX time used to calculate timing differences with the
- * information obtained from [ntpServers]. May optionally implement [WriteableClock] to be adjusted
- * on every synchronization with the calculated time difference.
+ * information obtained from [ntpServers].
  * @param coroutineScope The scope where synchronization will run on.
  * @param synchronizationInterval The amount of time to wait between a sync finishing and the next
  * one being started.
@@ -25,7 +24,7 @@ class SNTPClient(
   val coroutineScope: CoroutineScope = GlobalScope,
   val synchronizationInterval: Duration = 64.seconds,
 ) {
-  private val delegate = PlatformAgnosticSNTPClient(
+  private val delegate = SNTPClientImpl(
     ntpServers,
     referenceClock,
     coroutineScope,
@@ -43,14 +42,15 @@ class SNTPClient(
    * requests an immediate dispatch of a synchronization and subsequent ones
    * [synchronizationInterval] after each other.
    *
-   * @return The [Job] for the task that will make the requested synchronization activity update.
+   * @return The [Job] for the task that will run the requested synchronization activity update.
    */
   fun enableSynchronization() = delegate.enableSynchronization()
 
   /**
-   * Stops periodic synchronization if already started, does nothing otherwise.
+   * Stops periodic synchronization if already started, does nothing otherwise. Safe to call
+   * repeatedly.
    *
-   * @return The [Job] for the task that will make the requested synchronization activity update.
+   * @return The [Job] for the task that will run the requested synchronization activity update.
    */
   fun disableSynchronization() = delegate.disableSynchronization()
 }

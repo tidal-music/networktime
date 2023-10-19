@@ -27,6 +27,6 @@ class NTPServer(
   val dnsLookupStrategy: DnsLookupStrategy = DnsLookupStrategy.ALL,
   val queriesPerResolvedAddress: Short = 3,
   val waitBetweenResolvedAddressQueries: Duration = 2.seconds,
-  val pinnedPortNumber: Int? = null,
+  val pinnedPortNumber: UInt? = null,
   val ntpVersion: NTPVersion = NTPVersion.FOUR,
 )

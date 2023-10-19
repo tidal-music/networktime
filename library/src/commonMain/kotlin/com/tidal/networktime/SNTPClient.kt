@@ -2,6 +2,7 @@ package com.tidal.networktime
 
 import com.tidal.networktime.internal.SNTPClientImpl
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlin.time.Duration
@@ -18,7 +19,9 @@ import kotlin.time.Duration.Companion.seconds
  * @param synchronizationInterval The amount of time to wait between a sync finishing and the next
  * one being started.
  */
-class SNTPClient(
+class SNTPClient
+@OptIn(DelicateCoroutinesApi::class)
+constructor(
   vararg val ntpServers: NTPServer,
   val referenceClock: ReadableClock,
   val coroutineScope: CoroutineScope = GlobalScope,

@@ -20,11 +20,8 @@ internal class SNTPClientImpl(
       coroutineScope,
       Dispatchers.IO,
       syncInterval,
-      DomainNameResolver(
-        HttpClientFactory()(),
-        DnsOverHttpsResponseParser(),
-      ),
       ntpServers.asIterable(),
+      referenceClock,
     ),
 ) {
   val epochTime: Duration?

@@ -17,7 +17,7 @@ kotlin {
     val androidMain by getting {
       dependencies {
         implementation(project(":shared"))
-        implementation("androidx.activity:activity-compose:1.7.2")
+        implementation("androidx.activity:activity-compose:1.8.0")
         implementation(platform("androidx.compose:compose-bom:2023.03.00"))
         implementation("androidx.compose.material3:material3")
       }
@@ -26,9 +26,10 @@ kotlin {
 }
 
 android {
-  compileSdk = 33
+  compileSdk = 34
   defaultConfig {
     minSdk = 21
+    targetSdk = 34
   }
   namespace = "com.tidal.networktime.sample"
 }

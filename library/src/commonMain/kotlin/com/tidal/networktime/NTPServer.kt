@@ -16,8 +16,6 @@ import kotlin.time.Duration.Companion.seconds
  * also cause more server load.
  * @param waitBetweenResolvedAddressQueries The amount of time to wait before consecutive requests
  * to the same resolved address.
- * @param pinnedPortNumber The port number to send packets on. If null, a random choice of port to
- * be made for every packet, as recommended by RFC 9109.
  * @param ntpVersion The version number to write in packets.
  */
 class NTPServer(
@@ -27,6 +25,5 @@ class NTPServer(
   val dnsLookupStrategy: DnsLookupStrategy = DnsLookupStrategy.ALL,
   val queriesPerResolvedAddress: Short = 3,
   val waitBetweenResolvedAddressQueries: Duration = 2.seconds,
-  val pinnedPortNumber: UInt? = null,
   val ntpVersion: NTPVersion = NTPVersion.FOUR,
 )

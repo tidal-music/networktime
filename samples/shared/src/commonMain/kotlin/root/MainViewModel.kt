@@ -1,5 +1,6 @@
 package root
 
+import com.tidal.networktime.DnsLookupStrategy
 import com.tidal.networktime.NTPServer
 import com.tidal.networktime.SNTPClient
 import kotlinx.coroutines.GlobalScope

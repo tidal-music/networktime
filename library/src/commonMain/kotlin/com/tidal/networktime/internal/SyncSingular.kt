@@ -51,7 +51,6 @@ internal class SyncSingular(
         val ret = ntpExchanger(
           address,
           queryTimeout,
-          pinnedPortNumber,
           when (ntpVersion) {
             NTPVersion.ZERO -> 0U
             NTPVersion.ONE -> 1U

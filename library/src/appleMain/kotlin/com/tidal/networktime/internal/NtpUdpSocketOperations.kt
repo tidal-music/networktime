@@ -4,7 +4,7 @@ internal actual class NtpUdpSocketOperations {
 
   actual fun prepareSocket(timeoutMilliseconds: Long) {}
 
-  actual fun exchangePacketInPlace(buffer: ByteArray, address: String, portNumber: UInt) {}
+  actual fun exchangePacketInPlace(buffer: ByteArray, address: String, portNumber: Byte) {}
 
   actual fun closeSocket() {}
 }

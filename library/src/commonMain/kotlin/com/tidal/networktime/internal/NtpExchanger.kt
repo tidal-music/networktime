@@ -18,13 +18,13 @@ internal class NtpExchanger(
   ): NtpExchangeResult? {
     val ntpUdpSocketOperations = NtpUdpSocketOperations()
     val requestPacket = NtpPacket(
-      versionNumber = ntpVersion.toByte(),
-      mode = NTP_MODE_CLIENT.toByte(),
+      versionNumber = ntpVersion.toInt(),
+      mode = NTP_MODE_CLIENT,
     )
     return try {
       ntpUdpSocketOperations.prepareSocket(queryTimeout.inWholeMilliseconds)
       val requestTime = referenceClock.referenceEpochTime
-      val buffer = ntpPacketSerializer(requestPacket.copy(originateEpochTimestamp = requestTime))
+      val buffer = ntpPacketSerializer(requestPacket.copy(transmitEpochTimestamp = requestTime))
       ntpUdpSocketOperations.exchangePacketInPlace(
         buffer,
         address,

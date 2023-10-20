@@ -26,11 +26,11 @@ internal class SyncSingular(
       .sortedBy { it.clockOffset }
       .run {
         if (isEmpty()) {
-          null
+          return
         } else {
           this[size / 2]
         }
-      } ?: return
+      }
     mutableState.synchronizationResult = SynchronizationResult(
       selectedResult.run { timeMeasured + clockOffset },
       referenceClock.referenceEpochTime,
@@ -47,7 +47,7 @@ internal class SyncSingular(
       },
       lookupTimeout,
     ).map { address ->
-      (1..queriesPerResolvedAddress).map {
+      (1..queriesPerResolvedAddress).mapNotNull {
         val ret = ntpExchanger(
           address,
           queryTimeout,
@@ -62,7 +62,7 @@ internal class SyncSingular(
         )
         delay(waitBetweenResolvedAddressQueries)
         ret
-      }.filterNotNull()
+      }
         .takeIf { it.isNotEmpty() }
         ?.minBy { it.roundTripDelay }
     }

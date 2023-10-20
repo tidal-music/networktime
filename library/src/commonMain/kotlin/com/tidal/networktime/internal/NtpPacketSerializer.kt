@@ -1,12 +1,12 @@
 package com.tidal.networktime.internal
 
+import kotlin.random.Random
 import kotlin.time.Duration
 
-internal class NtpPacketSerializer {
+internal class NtpPacketSerializer(private val random: Random) {
   operator fun invoke(ntpPacket: NtpPacket) = with(ntpPacket) {
     byteArrayOf(
-      ((leapIndicator.toInt() and 0b11) or (versionNumber.toInt() and 0b110)).toByte(),
-      ((versionNumber.toInt() and 0b1) or (mode.toInt() and 0b111)).toByte(),
+      ((leapIndicator shl 6) or (versionNumber shl 3) or mode).toByte(),
       stratum,
       poll,
       precision,
@@ -25,6 +25,9 @@ internal class NtpPacketSerializer {
 
   private val Duration.asIntervalToNtpInterval: ByteArray
     get() {
+      if (this == Duration.INFINITE) {
+        return ByteArray(4)
+      }
       val wholeSeconds = inWholeSeconds
       val fraction = (inWholeMilliseconds - wholeSeconds * 1_000) * (1 shl 16) / 1_000
       return byteArrayOf(
@@ -37,6 +40,9 @@ internal class NtpPacketSerializer {
 
   private val Duration.asEpochTimestampToNtpEpochTimestamp: ByteArray
     get() {
+      if (this == Duration.INFINITE) {
+        return ByteArray(8)
+      }
       val seconds = (this + NtpPacket.NTP_EPOCH_OFFSET_WITH_EPOCH).inWholeSeconds
       val fraction = (inWholeMilliseconds - inWholeSeconds * 1_000) *
         0b100000000000000000000000000000000 /
@@ -49,7 +55,7 @@ internal class NtpPacketSerializer {
         (fraction shr 24).toByte(),
         (fraction shr 16).toByte(),
         (fraction shr 8).toByte(),
-        fraction.toByte(),
+        random.nextBytes(1).single(),
       )
     }
 }

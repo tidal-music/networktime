@@ -4,19 +4,19 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 
 internal data class NtpPacket(
-  val leapIndicator: Byte = 0,
-  val versionNumber: Byte = 0,
-  val mode: Byte = 0,
+  val leapIndicator: Int = 0,
+  val versionNumber: Int = 0,
+  val mode: Int = 0,
   val stratum: Byte = 0,
   val poll: Byte = 0,
   val precision: Byte = 0,
-  val rootDelay: Duration = Duration.ZERO,
-  val rootDispersion: Duration = Duration.ZERO,
+  val rootDelay: Duration = Duration.INFINITE,
+  val rootDispersion: Duration = Duration.INFINITE,
   val referenceIdentifier: Int = 0,
-  val referenceEpochTimestamp: Duration = Duration.ZERO,
-  val originateEpochTimestamp: Duration = Duration.ZERO,
-  val receiveEpochTimestamp: Duration = Duration.ZERO,
-  val transmitEpochTimestamp: Duration = Duration.ZERO,
+  val referenceEpochTimestamp: Duration = Duration.INFINITE,
+  val originateEpochTimestamp: Duration = Duration.INFINITE,
+  val receiveEpochTimestamp: Duration = Duration.INFINITE,
+  val transmitEpochTimestamp: Duration = Duration.INFINITE,
 ) {
   init {
     // Check sizes of fields whose type does not match their corresponding size in the actual packet

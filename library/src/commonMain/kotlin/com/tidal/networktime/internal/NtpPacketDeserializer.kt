@@ -9,9 +9,9 @@ internal class NtpPacketDeserializer {
   operator fun invoke(bytes: ByteArray): NtpPacket {
     var index = 0
     return NtpPacket(
-      ((bytes[index++].toInt() shl 8) + bytes[index++]).toByte(),
-      ((bytes[index++].toInt() shl 16) + (bytes[index++].toInt() shl 24) + bytes[index++]).toByte(),
-      ((bytes[index++].toInt() shl 16) + (bytes[index++].toInt() shl 24) + bytes[index++]).toByte(),
+      (bytes[index++].toInt() shl 8) + bytes[index++],
+      (bytes[index++].toInt() shl 16) + (bytes[index++].toInt() shl 24) + bytes[index++],
+      (bytes[index++].toInt() shl 16) + (bytes[index++].toInt() shl 24) + bytes[index++],
       bytes[index++],
       bytes[index++],
       bytes[index++],

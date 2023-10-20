@@ -16,11 +16,12 @@ internal class SyncPeriodic(
     HttpClientFactory()() { install(HttpTimeout) },
     DnsOverHttpsResponseParser(),
   ),
+  random: Random = Random.Default,
   private val ntpExchanger: NtpExchanger = NtpExchanger(
     referenceClock,
-    NtpPacketSerializer(),
+    NtpPacketSerializer(random),
     NtpPacketDeserializer(),
-    Random.Default,
+    random,
   ),
 ) {
   suspend operator fun invoke() {

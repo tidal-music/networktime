@@ -5,7 +5,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 
 internal actual class NtpUdpSocketOperations {
-  private lateinit var datagramSocket: DatagramSocket
+  private var datagramSocket: DatagramSocket? = null
 
   actual fun prepareSocket(timeoutMilliseconds: Long) {
     datagramSocket = DatagramSocket().apply { soTimeout = timeoutMilliseconds.toInt() }
@@ -14,10 +14,12 @@ internal actual class NtpUdpSocketOperations {
   actual fun exchangePacketInPlace(buffer: ByteArray, address: String, portNumber: UInt) {
     val requestPacket =
       DatagramPacket(buffer, buffer.size, InetAddress.getByName(address), portNumber.toInt())
-    datagramSocket.send(requestPacket)
+    datagramSocket!!.send(requestPacket)
     val responsePacket = DatagramPacket(buffer, buffer.size)
-    datagramSocket.receive(responsePacket)
+    datagramSocket!!.receive(responsePacket)
   }
 
-  actual fun closeSocket() = datagramSocket.close()
+  actual fun closeSocket() {
+    datagramSocket?.close()
+  }
 }

@@ -3,7 +3,6 @@ package com.tidal.networktime.internal
 import com.tidal.networktime.DnsLookupStrategy
 import com.tidal.networktime.NTPServer
 import com.tidal.networktime.NTPVersion
-import com.tidal.networktime.ReadableClock
 import kotlinx.coroutines.async
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -13,7 +12,7 @@ internal class SyncSingular(
   private val domainNameResolver: DomainNameResolver,
   private val ntpServers: Iterable<NTPServer>,
   private val ntpExchanger: NtpExchanger,
-  private val referenceClock: ReadableClock,
+  private val referenceClock: ReferenceClock,
   private val mutableState: MutableState,
 ) {
   suspend operator fun invoke() {
@@ -34,7 +33,7 @@ internal class SyncSingular(
       } ?: return
     mutableState.synchronizationResult = SynchronizationResult(
       selectedResult.run { timeMeasured + clockOffset },
-      referenceClock.epochTime,
+      referenceClock.referenceEpochTime,
     )
   }
 

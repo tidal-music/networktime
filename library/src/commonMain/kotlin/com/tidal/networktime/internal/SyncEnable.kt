@@ -1,7 +1,6 @@
 package com.tidal.networktime.internal
 
 import com.tidal.networktime.NTPServer
-import com.tidal.networktime.ReadableClock
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -13,7 +12,7 @@ internal class SyncEnable(
   private val syncDispatcher: CoroutineDispatcher,
   private val syncInterval: Duration,
   private val ntpServers: Iterable<NTPServer>,
-  private val referenceClock: ReadableClock,
+  private val referenceClock: ReferenceClock,
 ) : () -> Unit {
   override operator fun invoke() = with(mutableState) {
     val job = job

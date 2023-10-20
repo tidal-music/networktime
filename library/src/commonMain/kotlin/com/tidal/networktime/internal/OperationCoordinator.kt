@@ -1,7 +1,6 @@
 package com.tidal.networktime.internal
 
 import com.tidal.networktime.NTPServer
-import com.tidal.networktime.ReadableClock
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,7 +15,7 @@ constructor(
   globalDispatcher: CoroutineDispatcher,
   private val syncInterval: Duration,
   private val ntpServers: Iterable<NTPServer>,
-  private val referenceClock: ReadableClock,
+  private val referenceClock: ReferenceClock,
   private val toggleDispatcher: CoroutineDispatcher = globalDispatcher.limitedParallelism(1),
   private val syncDispatcher: CoroutineDispatcher = globalDispatcher,
 ) {

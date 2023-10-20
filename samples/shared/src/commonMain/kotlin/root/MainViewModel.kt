@@ -12,13 +12,11 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 class MainViewModel {
-  private val referenceClock = KotlinXDateTimeSystemClock()
   private val sntpClient = SNTPClient(
     NTPServer("time.google.com"),
     NTPServer("time.apple.com", dnsLookupStrategy = DnsLookupStrategy.IP_V6),
-    referenceClock = referenceClock,
   )
-  private val stateCalculator = StateCalculator(referenceClock, sntpClient)
+  private val stateCalculator = StateCalculator(sntpClient)
   private val _uiState = MutableStateFlow(stateCalculator())
   val uiState = _uiState.asStateFlow()
 

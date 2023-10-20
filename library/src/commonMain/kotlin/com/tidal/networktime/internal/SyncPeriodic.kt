@@ -1,7 +1,6 @@
 package com.tidal.networktime.internal
 
 import com.tidal.networktime.NTPServer
-import com.tidal.networktime.ReadableClock
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 import kotlin.time.Duration
@@ -9,7 +8,7 @@ import kotlin.time.Duration
 internal class SyncPeriodic(
   private val ntpServers: Iterable<NTPServer>,
   private val syncInterval: Duration,
-  private val referenceClock: ReadableClock,
+  private val referenceClock: ReferenceClock,
   private val mutableState: MutableState,
   private val domainNameResolver: DomainNameResolver = DomainNameResolver(
     HttpClientFactory()(),

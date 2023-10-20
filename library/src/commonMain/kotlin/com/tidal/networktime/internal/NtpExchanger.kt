@@ -1,12 +1,11 @@
 package com.tidal.networktime.internal
 
-import com.tidal.networktime.ReadableClock
 import kotlin.random.Random
 import kotlin.random.nextUInt
 import kotlin.time.Duration
 
 internal class NtpExchanger(
-  private val referenceClock: ReadableClock,
+  private val referenceClock: ReferenceClock,
   private val ntpPacketSerializer: NtpPacketSerializer,
   private val ntpPacketDeserializer: NtpPacketDeserializer,
   private val random: Random,
@@ -24,14 +23,14 @@ internal class NtpExchanger(
     )
     return try {
       ntpUdpSocketOperations.prepareSocket(queryTimeout.inWholeMilliseconds)
-      val requestTime = referenceClock.epochTime
+      val requestTime = referenceClock.referenceEpochTime
       val buffer = ntpPacketSerializer(requestPacket.copy(originateEpochTimestamp = requestTime))
       ntpUdpSocketOperations.exchangePacketInPlace(
         buffer,
         address,
         portNumber ?: random.nextUInt(),
       )
-      val responseTime = referenceClock.epochTime - requestTime
+      val responseTime = referenceClock.referenceEpochTime - requestTime
       NtpExchangeResult(responseTime, ntpPacketDeserializer(buffer))
     } catch (_: Throwable) {
       null

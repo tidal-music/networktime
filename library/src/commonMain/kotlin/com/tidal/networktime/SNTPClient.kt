@@ -13,8 +13,6 @@ import kotlin.time.Duration.Companion.seconds
  * [ntpServers] to obtain information about their provided time.
  *
  * @param ntpServers Representation of supported unicast NTP sources.
- * @param referenceClock A provider of UNIX time used to calculate timing differences with the
- * information obtained from [ntpServers].
  * @param coroutineScope The scope where synchronization will run on.
  * @param synchronizationInterval The amount of time to wait between a sync finishing and the next
  * one being started.
@@ -23,21 +21,17 @@ class SNTPClient
 @OptIn(DelicateCoroutinesApi::class)
 constructor(
   vararg val ntpServers: NTPServer,
-  val referenceClock: ReadableClock,
   val coroutineScope: CoroutineScope = GlobalScope,
   val synchronizationInterval: Duration = 64.seconds,
 ) {
   private val delegate = SNTPClientImpl(
     ntpServers,
-    referenceClock,
     coroutineScope,
     synchronizationInterval,
   )
 
   /**
-   * The calculated epoch time if it has been calculated at least once or null otherwise. Accuracy
-   * may vary depending on time since the last successful synchronization and accuracy of the
-   * provided [referenceClock].
+   * The calculated epoch time if it has been calculated at least once or null otherwise.
    */
   val epochTime by delegate::epochTime
 

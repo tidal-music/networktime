@@ -18,6 +18,7 @@ class MainViewModel {
       queriesPerResolvedAddress = 1,
       waitBetweenResolvedAddressQueries = 1.seconds,
     ),
+    synchronizationInterval = 5.seconds,
   )
   private val stateCalculator = StateCalculator(sntpClient)
   private val _uiState = MutableStateFlow(stateCalculator())

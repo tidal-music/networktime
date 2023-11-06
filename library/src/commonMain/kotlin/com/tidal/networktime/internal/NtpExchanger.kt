@@ -4,6 +4,7 @@ import kotlin.time.Duration
 
 internal class NtpExchanger(
   private val referenceClock: KotlinXDateTimeSystemClock,
+  private val fromEpochNtpTimestampFactory: FromEpochNtpTimestampFactory,
   private val ntpPacketSerializer: NtpPacketSerializer,
   private val ntpPacketDeserializer: NtpPacketDeserializer,
 ) {
@@ -13,21 +14,19 @@ internal class NtpExchanger(
     ntpVersion: UByte,
   ): NtpExchangeResult? {
     val ntpUdpSocketOperations = NtpUdpSocketOperations()
-    val requestPacket = NtpPacket(
-      versionNumber = ntpVersion.toInt(),
-      mode = NTP_MODE_CLIENT,
-    )
     return try {
       ntpUdpSocketOperations.prepareSocket(queryTimeout.inWholeMilliseconds)
+      val ntpPacket = NtpPacket(versionNumber = ntpVersion.toInt(), mode = NTP_MODE_CLIENT)
       val requestTime = referenceClock.referenceEpochTime
-      val buffer = ntpPacketSerializer(requestPacket.copy(transmitEpochTimestamp = requestTime))
+      ntpPacket.transmitEpochTimestamp = fromEpochNtpTimestampFactory(requestTime)
+      val buffer = ntpPacketSerializer(ntpPacket)
       ntpUdpSocketOperations.exchangePacketInPlace(
         buffer,
         address,
         NTP_PORT_NUMBER,
       )
-      val responseTime = referenceClock.referenceEpochTime - requestTime
-      NtpExchangeResult(responseTime, ntpPacketDeserializer(buffer))
+      val returnTime = referenceClock.referenceEpochTime
+      ntpPacketDeserializer(buffer)?.let { NtpExchangeResult(returnTime, it) }
     } catch (_: Throwable) {
       null
     } finally {

@@ -31,7 +31,7 @@ internal class SyncSingular(
         }
       }
     mutableState.synchronizationResult = SynchronizationResult(
-      selectedResult.run { timeMeasured + clockOffset },
+      selectedResult.run { returnTime + clockOffset },
       referenceClock.referenceEpochTime,
     )
   }

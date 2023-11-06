@@ -6,68 +6,89 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 internal class NtpPacketDeserializer {
-  operator fun invoke(bytes: ByteArray): NtpPacket {
+  operator fun invoke(bytes: ByteArray): NtpPacket? {
     var index = 0
+    val leapIndicator = (bytes[index].toInt() shr 6) and 0b11
+    if (leapIndicator == LEAP_INDICATOR_CLOCK_UNSYNCHRONIZED) {
+      return null
+    }
+    val versionNumber = (bytes[index].toInt() shr 3) and 0b111
+    val mode = bytes[index].toInt() and 0b111
+    if (mode != MODE_SERVER) {
+      return null
+    }
+    ++index
+    val stratum = bytes[index++].asUnsignedInt
+    if (stratum >= STRATUM_CLOCK_NOT_SYNCHRONIZED) {
+      return null
+    }
+    val poll = bytes[index++].asSignedIntToThePowerOf2.seconds
+    val precision = bytes[index++].asSignedIntToThePowerOf2.milliseconds
+    val rootDelay = bytes.sliceArray(index until index + 4).asNtpIntervalToInterval
+    index += 4
+    val rootDispersion = bytes.sliceArray(index until index + 4).asNtpIntervalToInterval
+    index += 4
+    val referenceIdentifier = bytes.sliceArray(index until index + 4).decodeToString()
+    index += 4
+    val reference = bytes.sliceArray(index until index + 8).asNtpTimestamp
+    index += 8
+    val originate = bytes.sliceArray(index until index + 8).asNtpTimestamp
+    index += 8
+    val receive = bytes.sliceArray(index until index + 8).asNtpTimestamp
+    index += 8
+    val transmit = bytes.sliceArray(index until index + 8).asNtpTimestamp
     return NtpPacket(
-      (bytes[index++].toInt() shl 8) + bytes[index++],
-      (bytes[index++].toInt() shl 16) + (bytes[index++].toInt() shl 24) + bytes[index++],
-      (bytes[index++].toInt() shl 16) + (bytes[index++].toInt() shl 24) + bytes[index++],
-      bytes[index++],
-      bytes[index++],
-      bytes[index++],
-      bytes.sliceArray(index until index + 32).asNtpIntervalToInterval.also { index += 32 },
-      bytes.sliceArray(index until index + 32).asNtpIntervalToInterval.also { index += 32 },
-      (bytes[index++].toInt() shl 24) +
-        (bytes[index++].toInt() shl 16) +
-        (bytes[index++].toInt() shl 8) +
-        bytes[index++].toInt(),
-      bytes.sliceArray(index until index + 64).asNtpEpochTimestampToEpochTime
-        .also { index += 64 },
-      bytes.sliceArray(index until index + 64).asNtpEpochTimestampToEpochTime
-        .also { index += 64 },
-      bytes.sliceArray(index until index + 64).asNtpEpochTimestampToEpochTime
-        .also { index += 64 },
-      bytes.sliceArray(index until index + 64).asNtpEpochTimestampToEpochTime,
+      leapIndicator,
+      versionNumber,
+      mode,
+      stratum,
+      poll,
+      precision,
+      rootDelay,
+      rootDispersion,
+      referenceIdentifier,
+      reference,
+      originate,
+      receive,
+      transmit,
     )
   }
+
+  private val Byte.asSignedIntToThePowerOf2
+    get() = 2.toDouble().pow(toInt())
+
+  private val Byte.asUnsignedInt: Int
+    get() = toUByte().toInt()
 
   private val ByteArray.asNtpIntervalToInterval: Duration
     get() {
       var index = 0
-      val seconds = (this[index++].toUByte().toInt() shl 8) +
-        this[index++].toUByte().toInt()
-      val fraction = (
-        (this[index++].toUByte().toInt() shl 8) +
-          this[index].toUByte().toInt()
-        ) *
-        1_000 /
-        (1 shl 16)
+      val seconds = (this[index++].asUnsignedInt shl 8) + this[index++].asUnsignedInt
+      val fraction = ((this[index++].asUnsignedInt shl 8) + this[index].asUnsignedInt)
+        .toDouble() / (1 shl 16) * 1_000
       return seconds.seconds + fraction.milliseconds
     }
 
-  private val ByteArray.asNtpEpochTimestampToEpochTime: Duration
+  private val Byte.asUnsignedLong: Long
+    get() = toUByte().toLong()
+
+  private val ByteArray.asNtpTimestamp: NtpTimestamp
     get() {
-      val rollOverAdjustment = if ((this[0].toInt() shr 7) == 0) {
-        2.toDouble().pow(32).seconds
-      } else {
-        Duration.ZERO
-      }
       var index = 0
-      val seconds = (this[index++].toUByte().toInt() shl 24) +
-        (this[index++].toUByte().toInt() shl 16) +
-        (this[index++].toUByte().toInt() shl 8) +
-        this[index++].toUByte().toInt()
-      val fraction = (
-        (this[index++].toUByte().toInt() shl 24) +
-          (this[index++].toUByte().toInt() shl 16) +
-          (this[index++].toUByte().toInt() shl 8) +
-          this[index].toUByte().toInt()
-        ) *
-        1_000 /
-        0b100000000000000000000000000000000
-      return seconds.seconds +
-        rollOverAdjustment -
-        NtpPacket.NTP_EPOCH_OFFSET_WITH_EPOCH +
-        fraction.milliseconds
+      val ntpMillis = (this[index++].asUnsignedLong shl 56) or
+        (this[index++].asUnsignedLong shl 48) or
+        (this[index++].asUnsignedLong shl 40) or
+        (this[index++].asUnsignedLong shl 32) or
+        (this[index++].asUnsignedLong shl 24) or
+        (this[index++].asUnsignedLong shl 16) or
+        (this[index++].asUnsignedLong shl 8) or
+        this[index].asUnsignedLong
+      return NtpTimestamp(ntpMillis.milliseconds)
     }
+
+  companion object {
+    private const val LEAP_INDICATOR_CLOCK_UNSYNCHRONIZED = 0b11
+    private const val MODE_SERVER = 4
+    private const val STRATUM_CLOCK_NOT_SYNCHRONIZED = 16
+  }
 }

@@ -21,7 +21,6 @@ internal class SyncPeriodic(
     referenceClock,
     NtpPacketSerializer(random),
     NtpPacketDeserializer(),
-    random,
   ),
 ) {
   suspend operator fun invoke() {

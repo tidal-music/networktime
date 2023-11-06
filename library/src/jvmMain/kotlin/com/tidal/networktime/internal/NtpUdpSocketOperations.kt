@@ -11,9 +11,9 @@ internal actual class NtpUdpSocketOperations {
     datagramSocket = DatagramSocket().apply { soTimeout = timeoutMilliseconds.toInt() }
   }
 
-  actual fun exchangePacketInPlace(buffer: ByteArray, address: String, portNumber: Byte) {
+  actual fun exchangePacketInPlace(buffer: ByteArray, address: String, portNumber: Int) {
     val requestPacket =
-      DatagramPacket(buffer, buffer.size, InetAddress.getByName(address), portNumber.toInt())
+      DatagramPacket(buffer, buffer.size, InetAddress.getByName(address), portNumber)
     datagramSocket!!.send(requestPacket)
     val responsePacket = DatagramPacket(buffer, buffer.size)
     datagramSocket!!.receive(responsePacket)

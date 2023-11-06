@@ -1,13 +1,11 @@
 package com.tidal.networktime.internal
 
-import kotlin.random.Random
 import kotlin.time.Duration
 
 internal class NtpExchanger(
   private val referenceClock: ReferenceClock,
   private val ntpPacketSerializer: NtpPacketSerializer,
   private val ntpPacketDeserializer: NtpPacketDeserializer,
-  private val random: Random,
 ) {
   operator fun invoke(
     address: String,
@@ -26,7 +24,7 @@ internal class NtpExchanger(
       ntpUdpSocketOperations.exchangePacketInPlace(
         buffer,
         address,
-        NTP_PORT_NUMBER.toByte(),
+        NTP_PORT_NUMBER,
       )
       val responseTime = referenceClock.referenceEpochTime - requestTime
       NtpExchangeResult(responseTime, ntpPacketDeserializer(buffer))

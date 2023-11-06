@@ -5,8 +5,8 @@ import kotlin.time.Duration.Companion.days
 
 internal data class NtpPacket(
   val leapIndicator: Int = 0,
-  val versionNumber: Int = 0,
-  val mode: Int = 0,
+  val versionNumber: Int,
+  val mode: Int,
   val stratum: Byte = 0,
   val poll: Byte = 0,
   val precision: Byte = 0,

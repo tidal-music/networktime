@@ -1,6 +1,5 @@
 package root
 
-import com.tidal.networktime.DnsLookupStrategy
 import com.tidal.networktime.NTPServer
 import com.tidal.networktime.SNTPClient
 import kotlinx.coroutines.GlobalScope
@@ -14,7 +13,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class MainViewModel {
   private val sntpClient = SNTPClient(
     NTPServer("time.google.com"),
-    NTPServer("time.apple.com", dnsLookupStrategy = DnsLookupStrategy.IP_V6),
+    NTPServer("time.apple.com", queriesPerResolvedAddress = 1),
   )
   private val stateCalculator = StateCalculator(sntpClient)
   private val _uiState = MutableStateFlow(stateCalculator())

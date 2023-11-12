@@ -10,7 +10,7 @@ internal class NtpExchanger(
   operator fun invoke(
     address: String,
     queryTimeout: Duration,
-    ntpVersion: UInt,
+    ntpVersion: UByte,
   ): NtpExchangeResult? {
     val ntpUdpSocketOperations = NtpUdpSocketOperations()
     val requestPacket = NtpPacket(

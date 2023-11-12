@@ -1,6 +1,5 @@
 plugins {
   kotlin("multiplatform")
-  kotlin("plugin.serialization")
   id("com.android.library")
 }
 
@@ -32,25 +31,13 @@ kotlin {
   }
 
   sourceSets {
-    val versionKtor = "2.3.3"
     commonMain.get().dependencies {
       api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-      implementation("io.ktor:ktor-client-core:$versionKtor")
-      implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
       implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
     }
-    val jvmMain by getting {
-      dependencies {
-        implementation("io.ktor:ktor-client-okhttp:$versionKtor")
-      }
-    }
+    val jvmMain by getting {}
     val androidMain by getting {
       dependsOn(jvmMain)
-    }
-    val appleMain by getting {
-      dependencies {
-        implementation("io.ktor:ktor-client-darwin:$versionKtor")
-      }
     }
   }
 }

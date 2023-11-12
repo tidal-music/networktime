@@ -50,7 +50,9 @@ internal class SyncSingular(
             NTPVersion.FOUR -> 4U
           },
         )
-        delay(waitBetweenResolvedAddressQueries)
+        if (it.toShort() != queriesPerResolvedAddress) {
+          delay(waitBetweenResolvedAddressQueries)
+        }
         ret
       }
         .takeIf { it.isNotEmpty() }

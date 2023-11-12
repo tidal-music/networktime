@@ -9,11 +9,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class MainViewModel {
   private val sntpClient = SNTPClient(
-    NTPServer("time.google.com"),
-    NTPServer("time.apple.com", queriesPerResolvedAddress = 1),
+    NTPServer(
+      "time.google.com",
+      queriesPerResolvedAddress = 1,
+      waitBetweenResolvedAddressQueries = 1.seconds,
+    ),
   )
   private val stateCalculator = StateCalculator(sntpClient)
   private val _uiState = MutableStateFlow(stateCalculator())

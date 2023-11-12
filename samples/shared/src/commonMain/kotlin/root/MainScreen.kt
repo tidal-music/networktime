@@ -12,6 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Duration
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -36,10 +40,15 @@ fun MainScreen(mainViewModel: MainViewModel) {
           verticalArrangement = Arrangement.SpaceAround,
           horizontalArrangement = Arrangement.Start,
         ) {
-          Text(state.localEpoch.toIsoString(), style = textStyle)
-          Text(state.synchronizedEpoch?.toIsoString() ?: "None", style = textStyle)
+          Text(state.localEpoch.epochToString, style = textStyle)
+          Text(state.synchronizedEpoch?.epochToString ?: "None", style = textStyle)
         }
       }
     }
   }
 }
+
+private val Duration.epochToString
+  get() = Instant.fromEpochMilliseconds(inWholeMilliseconds)
+    .toLocalDateTime(TimeZone.UTC)
+    .toString()

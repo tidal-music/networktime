@@ -3,7 +3,7 @@ package com.tidal.networktime.internal
 import kotlin.time.Duration
 
 internal class NtpExchanger(
-  private val referenceClock: ReferenceClock,
+  private val referenceClock: KotlinXDateTimeSystemClock,
   private val ntpPacketSerializer: NtpPacketSerializer,
   private val ntpPacketDeserializer: NtpPacketDeserializer,
 ) {

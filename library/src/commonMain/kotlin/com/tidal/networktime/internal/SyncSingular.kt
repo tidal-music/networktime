@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 internal class SyncSingular(
   private val ntpServers: Iterable<NTPServer>,
   private val ntpExchanger: NtpExchanger,
-  private val referenceClock: ReferenceClock,
+  private val referenceClock: KotlinXDateTimeSystemClock,
   private val mutableState: MutableState,
   private val addressResolver: AddressResolver = AddressResolver(),
 ) {

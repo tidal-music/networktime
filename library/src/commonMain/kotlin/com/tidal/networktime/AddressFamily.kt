@@ -12,5 +12,5 @@ enum class AddressFamily {
   /**
    * IPv6.
    */
-  INET6
+  INET6,
 }

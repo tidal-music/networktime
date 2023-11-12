@@ -11,7 +11,7 @@ internal class SNTPClientImpl(
   ntpServers: Array<out NTPServer>,
   coroutineScope: CoroutineScope,
   syncInterval: Duration = 64.seconds,
-  private val referenceClock: ReferenceClock = KotlinXDateTimeSystemClock(),
+  private val referenceClock: KotlinXDateTimeSystemClock = KotlinXDateTimeSystemClock(),
   private val mutableState: MutableState = MutableState(),
   private val operationCoordinator: OperationCoordinator =
     OperationCoordinator(

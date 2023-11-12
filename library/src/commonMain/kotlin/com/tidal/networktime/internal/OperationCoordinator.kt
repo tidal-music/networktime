@@ -15,7 +15,7 @@ constructor(
   globalDispatcher: CoroutineDispatcher,
   private val syncInterval: Duration,
   private val ntpServers: Iterable<NTPServer>,
-  private val referenceClock: ReferenceClock,
+  private val referenceClock: KotlinXDateTimeSystemClock,
   private val toggleDispatcher: CoroutineDispatcher = globalDispatcher.limitedParallelism(1),
   private val syncDispatcher: CoroutineDispatcher = globalDispatcher,
 ) {

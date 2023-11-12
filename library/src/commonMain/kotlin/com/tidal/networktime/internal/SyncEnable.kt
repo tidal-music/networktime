@@ -12,7 +12,7 @@ internal class SyncEnable(
   private val syncDispatcher: CoroutineDispatcher,
   private val syncInterval: Duration,
   private val ntpServers: Iterable<NTPServer>,
-  private val referenceClock: ReferenceClock,
+  private val referenceClock: KotlinXDateTimeSystemClock,
 ) : () -> Unit {
   override operator fun invoke() = with(mutableState) {
     val job = job

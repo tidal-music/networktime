@@ -8,15 +8,19 @@ import java.net.InetAddress
 internal actual class AddressResolver {
   actual operator fun invoke(
     address: String,
-    addressFamilies: Array<out AddressFamily>
-  ): Iterable<String> = InetAddress.getAllByName(address)
-    .mapNotNull {
-      when (it) {
-        is Inet4Address -> it.takeIf { addressFamilies.contains(AddressFamily.INET) }
-        is Inet6Address -> it.takeIf { addressFamilies.contains(AddressFamily.INET6) }
-        else -> throw IllegalArgumentException(
-          "Illegal InetAddress with type ${it.javaClass.simpleName}"
-        )
-      }?.hostAddress
-    }
+    addressFamilies: Array<out AddressFamily>,
+  ): Iterable<String> {
+    val containsInet = addressFamilies.contains(AddressFamily.INET)
+    val containsInet6 = addressFamilies.contains(AddressFamily.INET6)
+    return InetAddress.getAllByName(address)
+      .mapNotNull {
+        when (it) {
+          is Inet4Address -> it.takeIf { containsInet }
+          is Inet6Address -> it.takeIf { containsInet6 }
+          else -> throw IllegalArgumentException(
+            "Illegal InetAddress with type ${it.javaClass.simpleName}",
+          )
+        }?.hostAddress
+      }
+  }
 }

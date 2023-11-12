@@ -8,7 +8,7 @@ import kotlin.time.Duration
 internal class SyncPeriodic(
   private val ntpServers: Iterable<NTPServer>,
   private val syncInterval: Duration,
-  private val referenceClock: ReferenceClock,
+  private val referenceClock: KotlinXDateTimeSystemClock,
   private val mutableState: MutableState,
   random: Random = Random.Default,
   private val ntpExchanger: NtpExchanger = NtpExchanger(

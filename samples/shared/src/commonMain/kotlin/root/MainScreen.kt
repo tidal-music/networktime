@@ -42,18 +42,8 @@ fun MainScreen(mainViewModel: MainViewModel) {
         ) {
           Text(state.localEpoch.epochToString, style = textStyle)
           val synchronizedEpoch = state.synchronizedEpoch ?: return@FlowColumn
-          val diff = synchronizedEpoch - state.localEpoch
           Text(
-            "${synchronizedEpoch.epochToString} " +
-              "(${
-                if (diff > Duration.ZERO) {
-                  "ahead "
-                } else if (diff < Duration.ZERO) {
-                  "behind "
-                } else {
-                  ""
-                }
-              }$diff)",
+            "${synchronizedEpoch.epochToString} " + "(δ=${synchronizedEpoch - state.localEpoch})",
             style = textStyle,
           )
         }

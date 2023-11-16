@@ -11,11 +11,13 @@ internal data class NtpExchangeResult(
 ) {
   val roundTripDelay: Duration
     get() = ntpPacket.run {
-      val originEpochMillis = originateEpochTimestamp.epochTime.inWholeMilliseconds
+      val originEpochMillis = originateEpochTimestamp.asEpochTimestamp.epochTime.inWholeMilliseconds
       val receiveNtpMillis = receiveEpochTimestamp.ntpTime.inWholeMilliseconds
-      val receiveEpochMillis = receiveEpochTimestamp.epochTime.inWholeMilliseconds
+      val receiveEpochMillis = receiveEpochTimestamp.asEpochTimestamp.epochTime.inWholeMilliseconds
       val transmitNtpMillis = transmitEpochTimestamp.ntpTime.inWholeMilliseconds
-      val transmitEpochMillis = transmitEpochTimestamp.epochTime.inWholeMilliseconds
+      val transmitEpochMillis = transmitEpochTimestamp.asEpochTimestamp
+        .epochTime
+        .inWholeMilliseconds
       val returnTimeMillis = returnTime.inWholeMilliseconds
       if (receiveNtpMillis == 0L || transmitNtpMillis == 0L) {
         return@run if (returnTimeMillis >= originEpochMillis) {
@@ -39,11 +41,13 @@ internal data class NtpExchangeResult(
   val clockOffset: Duration
     get() = ntpPacket.run {
       val originNtpMillis = originateEpochTimestamp.ntpTime.inWholeMilliseconds
-      val originEpochMillis = originateEpochTimestamp.epochTime.inWholeMilliseconds
+      val originEpochMillis = originateEpochTimestamp.asEpochTimestamp.epochTime.inWholeMilliseconds
       val receiveNtpMillis = receiveEpochTimestamp.ntpTime.inWholeMilliseconds
-      val receiveEpochMillis = receiveEpochTimestamp.epochTime.inWholeMilliseconds
+      val receiveEpochMillis = receiveEpochTimestamp.asEpochTimestamp.epochTime.inWholeMilliseconds
       val transmitNtpMillis = transmitEpochTimestamp.ntpTime.inWholeMilliseconds
-      val transmitEpochMillis = transmitEpochTimestamp.epochTime.inWholeMilliseconds
+      val transmitEpochMillis = transmitEpochTimestamp.asEpochTimestamp
+        .epochTime
+        .inWholeMilliseconds
       val returnTimeMillis = returnTime.inWholeMilliseconds
       if (originNtpMillis == 0L) {
         if (transmitNtpMillis != 0L) {

@@ -1,5 +1,6 @@
 package com.tidal.networktime.internal
 
+import kotlin.jvm.JvmInline
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -7,9 +8,9 @@ import kotlin.time.Duration.Companion.milliseconds
  * NTP timestamps have more precision than epochs represented with Kotlin's Long, so use them as the
  * non-computed property.
  */
-// TODO Convert this and FromEpochNtpTimestampFactory into two inline classes wrapping Duration
-internal data class NtpTimestamp(val ntpTime: Duration) {
-  val epochTime: Duration
+@JvmInline
+internal value class NtpTimestamp(val ntpTime: Duration) {
+  val asEpochTimestamp: EpochTimestamp
     get() {
       val ntpTimeValue = ntpTime.inWholeMilliseconds
       val seconds = ntpTimeValue ushr 32 and 0xffffffff
@@ -21,6 +22,6 @@ internal data class NtpTimestamp(val ntpTime: Duration) {
         } else {
           NtpPacket.NTP_TIMESTAMP_BASE_WITH_EPOCH_MSB_1_MILLISECONDS
         } + seconds * 1000 + fraction
-        ).milliseconds
+        ).milliseconds.let { EpochTimestamp(it) }
     }
 }

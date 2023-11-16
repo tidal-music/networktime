@@ -11,7 +11,6 @@ internal class SyncPeriodic(
   private val mutableState: MutableState,
   private val ntpExchanger: NtpExchanger = NtpExchanger(
     referenceClock,
-    FromEpochNtpTimestampFactory(),
     NtpPacketSerializer(),
     NtpPacketDeserializer(),
   ),

@@ -1,14 +1,14 @@
 package com.tidal.networktime.internal
 
+import kotlin.jvm.JvmInline
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-internal class FromEpochNtpTimestampFactory {
-  operator fun invoke(epochTime: Duration) = NtpTimestamp(epochTime.epochTimeAsNtpTime)
-
-  private val Duration.epochTimeAsNtpTime: Duration
+@JvmInline
+internal value class EpochTimestamp(val epochTime: Duration) {
+  val asNtpTimestamp: NtpTimestamp
     get() {
-      val millis = inWholeMilliseconds
+      val millis = epochTime.inWholeMilliseconds
       val useBase1 = millis < NtpPacket.NTP_TIMESTAMP_BASE_WITH_EPOCH_MSB_0_MILLISECONDS
       val baseTimeMillis = millis -
         if (useBase1) {
@@ -21,6 +21,6 @@ internal class FromEpochNtpTimestampFactory {
         seconds = seconds or 0x80000000L
       }
       val fraction = baseTimeMillis % 1_000 * 0x100000000L / 1_000
-      return (seconds shl 32 or fraction).milliseconds
+      return NtpTimestamp((seconds shl 32 or fraction).milliseconds)
     }
 }

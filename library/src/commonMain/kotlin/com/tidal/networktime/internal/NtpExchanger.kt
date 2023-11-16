@@ -4,7 +4,6 @@ import kotlin.time.Duration
 
 internal class NtpExchanger(
   private val referenceClock: KotlinXDateTimeSystemClock,
-  private val fromEpochNtpTimestampFactory: FromEpochNtpTimestampFactory,
   private val ntpPacketSerializer: NtpPacketSerializer,
   private val ntpPacketDeserializer: NtpPacketDeserializer,
 ) {
@@ -18,7 +17,7 @@ internal class NtpExchanger(
       ntpUdpSocketOperations.prepareSocket(queryTimeout.inWholeMilliseconds)
       val ntpPacket = NtpPacket(versionNumber = ntpVersion.toInt(), mode = NTP_MODE_CLIENT)
       val requestTime = referenceClock.referenceEpochTime
-      ntpPacket.transmitEpochTimestamp = fromEpochNtpTimestampFactory(requestTime)
+      ntpPacket.transmitEpochTimestamp = EpochTimestamp(requestTime).asNtpTimestamp
       val buffer = ntpPacketSerializer(ntpPacket)
       ntpUdpSocketOperations.exchangePacketInPlace(
         buffer,

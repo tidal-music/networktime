@@ -8,8 +8,9 @@ internal class StateCalculator(
   private val sntpClient: SNTPClient,
   private val localClock: Clock = Clock.System,
 ) {
-  operator fun invoke(): MainState = MainState(
+  operator fun invoke(synchronizationEnabled: Boolean): MainState = MainState(
     localEpoch = localClock.now().toEpochMilliseconds().milliseconds,
     synchronizedEpoch = sntpClient.epochTime,
+    synchronizationEnabled,
   )
 }

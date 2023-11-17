@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.properties.Delegates
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -21,16 +22,33 @@ class MainViewModel {
     synchronizationInterval = 5.seconds,
   )
   private val stateCalculator = StateCalculator(sntpClient)
-  private val _uiState = MutableStateFlow(stateCalculator())
+  private var synchronizationEnabled by Delegates.observable(false) { _, _, _ ->
+    publishState()
+  }
+  private val _uiState = MutableStateFlow(calculateState())
   val uiState = _uiState.asStateFlow()
 
   init {
-    sntpClient.enableSynchronization()
+    toggleSynchronization()
     GlobalScope.launch {
       while (true) {
-        _uiState.update { stateCalculator() }
+        publishState()
         delay(1.milliseconds)
       }
     }
+  }
+
+  fun toggleSynchronization() {
+    when (synchronizationEnabled) {
+      true -> sntpClient.disableSynchronization()
+      false -> sntpClient.enableSynchronization()
+    }
+    synchronizationEnabled = !synchronizationEnabled
+  }
+
+  private fun calculateState() = stateCalculator(synchronizationEnabled)
+
+  private fun publishState() {
+    _uiState.update { calculateState() }
   }
 }

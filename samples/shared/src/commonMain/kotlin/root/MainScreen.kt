@@ -43,16 +43,14 @@ fun MainScreen(mainViewModel: MainViewModel) {
           horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.fillMaxWidth(),
         ) {
-          Text("Net=", style = textStyle)
           val synchronizedEpoch = state.synchronizedEpoch
-          Text(
-            if (synchronizedEpoch == null) {
-              "Not yet available"
-            } else {
-              "${synchronizedEpoch.epochToString} (δ=${synchronizedEpoch - state.localEpoch})"
-            },
-            style = textStyle,
-          )
+          val deltaString = if (synchronizedEpoch == null) {
+            "N/A"
+          } else {
+            synchronizedEpoch - state.localEpoch
+          }
+          Text("Net (δ=$deltaString)=", style = textStyle)
+          Text(synchronizedEpoch?.epochToString ?: "Not yet available", style = textStyle)
         }
         Row(
           verticalAlignment = Alignment.CenterVertically,

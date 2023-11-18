@@ -12,7 +12,7 @@ internal class SyncSingular(
   private val ntpServers: Iterable<NTPServer>,
   private val ntpExchanger: NTPExchanger,
   private val referenceClock: KotlinXDateTimeSystemClock,
-  private val mutableState: MutableState,
+  private val synchronizationResultProcessor: SynchronizationResultProcessor,
   private val addressResolver: AddressResolver = AddressResolver(),
 ) {
   suspend operator fun invoke() {
@@ -31,44 +31,48 @@ internal class SyncSingular(
           this[size / 2]
         }
       }
-    mutableState.synchronizationResult = SynchronizationResult(
+    synchronizationResultProcessor.synchronizationResult = SynchronizationResult(
       selectedResult.run { returnTime + clockOffset },
       referenceClock.referenceEpochTime,
     )
   }
 
   private suspend fun pickNTPPacketWithShortestRoundTrip(ntpServer: NTPServer) = with(ntpServer) {
-    addressResolver(
-      name,
-      AddressFamily.INET in addressFamilies,
-      AddressFamily.INET6 in addressFamilies,
-    ).map { resolvedAddress ->
-      (1..queriesPerResolvedAddress).mapNotNull {
-        val ret = ntpExchanger(
-          resolvedAddress,
-          queryTimeout,
-          when (ntpVersion) {
-            NTPVersion.ZERO -> 0U
-            NTPVersion.ONE -> 1U
-            NTPVersion.TWO -> 2U
-            NTPVersion.THREE -> 3U
-            NTPVersion.FOUR -> 4U
-          },
-        )
-        if (it.toShort() != queriesPerResolvedAddress) {
-          delay(waitBetweenResolvedAddressQueries)
+    try {
+      addressResolver(
+        name,
+        AddressFamily.INET in addressFamilies,
+        AddressFamily.INET6 in addressFamilies,
+      ).map { resolvedAddress ->
+        (1..queriesPerResolvedAddress).mapNotNull {
+          val ret = ntpExchanger(
+            resolvedAddress,
+            queryTimeout,
+            when (ntpVersion) {
+              NTPVersion.ZERO -> 0U
+              NTPVersion.ONE -> 1U
+              NTPVersion.TWO -> 2U
+              NTPVersion.THREE -> 3U
+              NTPVersion.FOUR -> 4U
+            },
+          )
+          if (it.toShort() != queriesPerResolvedAddress) {
+            delay(waitBetweenResolvedAddressQueries)
+          }
+          if (
+            ret?.ntpPacket?.run { rootDelay <= maxRootDelay && rootDispersion <= maxRootDispersion }
+            == true
+          ) {
+            ret
+          } else {
+            null
+          }
         }
-        if (
-          ret?.ntpPacket?.run { rootDelay <= maxRootDelay && rootDispersion <= maxRootDispersion }
-          == true
-        ) {
-          ret
-        } else {
-          null
-        }
+          .takeIf { it.isNotEmpty() }
+          ?.minBy { it.roundTripDelay }
       }
-        .takeIf { it.isNotEmpty() }
-        ?.minBy { it.roundTripDelay }
+    } catch (_: Throwable) {
+      emptySet()
     }
   }
 }

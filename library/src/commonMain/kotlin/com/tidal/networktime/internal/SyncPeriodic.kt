@@ -8,7 +8,7 @@ internal class SyncPeriodic(
   private val ntpServers: Iterable<NTPServer>,
   private val syncInterval: Duration,
   private val referenceClock: KotlinXDateTimeSystemClock,
-  private val mutableState: MutableState,
+  private val synchronizationResultProcessor: SynchronizationResultProcessor,
   private val ntpExchanger: NTPExchanger = NTPExchanger(
     referenceClock,
     NTPPacketSerializer(),
@@ -17,7 +17,7 @@ internal class SyncPeriodic(
 ) {
   suspend operator fun invoke() {
     while (true) {
-      SyncSingular(ntpServers, ntpExchanger, referenceClock, mutableState)()
+      SyncSingular(ntpServers, ntpExchanger, referenceClock, synchronizationResultProcessor)()
       delay(syncInterval)
     }
   }

@@ -8,6 +8,7 @@ import kotlin.time.Duration
 
 internal class SyncEnable(
   private val mutableState: MutableState,
+  private val synchronizationResultProcessor: SynchronizationResultProcessor,
   private val coroutineScope: CoroutineScope,
   private val syncDispatcher: CoroutineDispatcher,
   private val syncInterval: Duration,
@@ -20,7 +21,7 @@ internal class SyncEnable(
       return
     }
     this.job = coroutineScope.launch(syncDispatcher) {
-      SyncPeriodic(ntpServers, syncInterval, referenceClock, mutableState)()
+      SyncPeriodic(ntpServers, syncInterval, referenceClock, synchronizationResultProcessor)()
     }
   }
 }

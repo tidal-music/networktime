@@ -11,6 +11,7 @@ internal class OperationCoordinator
 @OptIn(ExperimentalCoroutinesApi::class)
 constructor(
   private val mutableState: MutableState,
+  private val synchronizationResultProcessor: SynchronizationResultProcessor,
   private val coroutineScope: CoroutineScope,
   globalDispatcher: CoroutineDispatcher,
   private val syncInterval: Duration,
@@ -22,6 +23,7 @@ constructor(
   fun dispatchStartSync() = dispatch(
     SyncEnable(
       mutableState,
+      synchronizationResultProcessor,
       coroutineScope,
       syncDispatcher,
       syncInterval,

@@ -4,18 +4,25 @@ import com.tidal.networktime.NTPServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import okio.Path
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 internal class SNTPClientImpl(
   ntpServers: Array<out NTPServer>,
   coroutineScope: CoroutineScope,
-  syncInterval: Duration = 64.seconds,
+  backupFilePath: Path?,
+  syncInterval: Duration,
   private val referenceClock: KotlinXDateTimeSystemClock = KotlinXDateTimeSystemClock(),
   private val mutableState: MutableState = MutableState(),
+  private val synchronizationResultProcessor: SynchronizationResultProcessor =
+    SynchronizationResultProcessor(
+      mutableState,
+      backupFilePath,
+    ),
   private val operationCoordinator: OperationCoordinator =
     OperationCoordinator(
       mutableState,
+      synchronizationResultProcessor,
       coroutineScope,
       Dispatchers.IO,
       syncInterval,
@@ -25,7 +32,8 @@ internal class SNTPClientImpl(
 ) {
   val epochTime: Duration?
     get() {
-      val (synchronizedTime, synchronizedAt) = mutableState.synchronizationResult ?: return null
+      val (synchronizedTime, synchronizedAt) =
+        synchronizationResultProcessor.synchronizationResult ?: return null
       return synchronizedTime - synchronizedAt + referenceClock.referenceEpochTime
     }
 

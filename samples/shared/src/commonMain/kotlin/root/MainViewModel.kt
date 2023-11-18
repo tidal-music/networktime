@@ -20,6 +20,7 @@ class MainViewModel {
       waitBetweenResolvedAddressQueries = 1.seconds,
     ),
     synchronizationInterval = 5.seconds,
+    backupFilePath = "sampleClockBackupFile",
   )
   private val stateCalculator = StateCalculator(sntpClient)
   private var synchronizationEnabled by Delegates.observable(false) { _, _, _ ->

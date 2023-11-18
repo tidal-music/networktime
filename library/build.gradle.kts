@@ -1,6 +1,7 @@
 plugins {
   kotlin("multiplatform")
   id("com.android.library")
+  kotlin("plugin.serialization")
 }
 
 group = "com.tidal.network-time"
@@ -34,6 +35,8 @@ kotlin {
     commonMain.get().dependencies {
       api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
       implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+      implementation("com.squareup.okio:okio:3.6.0")
+      implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.6.1")
     }
     val jvmMain by getting {}
     val androidMain by getting {

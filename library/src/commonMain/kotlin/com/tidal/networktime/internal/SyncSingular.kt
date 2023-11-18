@@ -1,5 +1,6 @@
 package com.tidal.networktime.internal
 
+import com.tidal.networktime.AddressFamily
 import com.tidal.networktime.NTPServer
 import com.tidal.networktime.NTPVersion
 import kotlinx.coroutines.async
@@ -37,7 +38,11 @@ internal class SyncSingular(
   }
 
   private suspend fun pickNTPPacketWithShortestRoundTrip(ntpServer: NTPServer) = with(ntpServer) {
-    addressResolver(name, addressFamilies).map { resolvedAddress ->
+    addressResolver(
+      name,
+      AddressFamily.INET in addressFamilies,
+      AddressFamily.INET6 in addressFamilies,
+    ).map { resolvedAddress ->
       (1..queriesPerResolvedAddress).mapNotNull {
         val ret = ntpExchanger(
           resolvedAddress,

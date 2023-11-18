@@ -46,7 +46,7 @@ JSON=$(jq --null-input \
 --arg RUN_ID "$GITHUB_RUN_ID" \
 --arg HTML_URL "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
 --arg DETECTOR_NAME "$GITHUB_REPOSITORY" \
---arg DETECTOR_VERSION 1 \
+--arg DETECTOR_VERSION 2 \
 --arg DETECTOR_URL "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
 --arg SCANNED "$SCANNED_AT" \
 --arg MANIFEST_NAME "$MANIFEST_NAME" \
@@ -80,9 +80,8 @@ JSON=$(jq --null-input \
 }
 ')
 
-for LINE in $(cat $INPUT_FILE)
-do
-  JSON=$(jq '.manifests.'$MANIFEST_NAME'.resolved += {"'$LINE'": {"package_url": "pkg:/maven/'$LINE'"}}' <<< $JSON)
-done
+while IFS= read -r LINE
+do JSON=$(jq '.manifests.'"$MANIFEST_NAME"'.resolved += {"'"$LINE"'": {"package_url": "https://central.sonatype.com/artifact/'"$(echo "$LINE" | tr ':' '/')"'"}}' <<< "$JSON")
+done < "$INPUT_FILE"
 
-jq -r tostring <<< $JSON
+jq -r tostring <<< "$JSON"

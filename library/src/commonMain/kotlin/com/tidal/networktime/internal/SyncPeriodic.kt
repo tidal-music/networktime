@@ -9,10 +9,10 @@ internal class SyncPeriodic(
   private val syncInterval: Duration,
   private val referenceClock: KotlinXDateTimeSystemClock,
   private val mutableState: MutableState,
-  private val ntpExchanger: NtpExchanger = NtpExchanger(
+  private val ntpExchanger: NTPExchanger = NTPExchanger(
     referenceClock,
-    NtpPacketSerializer(),
-    NtpPacketDeserializer(),
+    NTPPacketSerializer(),
+    NTPPacketDeserializer(),
   ),
 ) {
   suspend operator fun invoke() {

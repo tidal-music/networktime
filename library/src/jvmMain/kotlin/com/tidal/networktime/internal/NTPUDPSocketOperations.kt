@@ -4,7 +4,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
-internal actual class NtpUdpSocketOperations {
+internal actual class NTPUDPSocketOperations {
   private var datagramSocket: DatagramSocket? = null
 
   actual fun prepareSocket(timeoutMilliseconds: Long) {

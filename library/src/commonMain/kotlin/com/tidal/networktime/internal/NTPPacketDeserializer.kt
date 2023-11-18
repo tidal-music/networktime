@@ -5,8 +5,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-internal class NtpPacketDeserializer {
-  operator fun invoke(bytes: ByteArray): NtpPacket? {
+internal class NTPPacketDeserializer {
+  operator fun invoke(bytes: ByteArray): NTPPacket? {
     var index = 0
     val leapIndicator = (bytes[index].toInt() shr 6) and 0b11
     if (leapIndicator == LEAP_INDICATOR_CLOCK_UNSYNCHRONIZED) {
@@ -24,20 +24,20 @@ internal class NtpPacketDeserializer {
     }
     val poll = bytes[index++].asSignedIntToThePowerOf2.seconds
     val precision = bytes[index++].asSignedIntToThePowerOf2.milliseconds
-    val rootDelay = bytes.sliceArray(index until index + 4).asNtpIntervalToInterval
+    val rootDelay = bytes.sliceArray(index until index + 4).asNTPIntervalToInterval
     index += 4
-    val rootDispersion = bytes.sliceArray(index until index + 4).asNtpIntervalToInterval
+    val rootDispersion = bytes.sliceArray(index until index + 4).asNTPIntervalToInterval
     index += 4
     val referenceIdentifier = bytes.sliceArray(index until index + 4).decodeToString()
     index += 4
-    val reference = bytes.sliceArray(index until index + 8).asNtpTimestamp
+    val reference = bytes.sliceArray(index until index + 8).asNTPTimestamp
     index += 8
-    val originate = bytes.sliceArray(index until index + 8).asNtpTimestamp
+    val originate = bytes.sliceArray(index until index + 8).asNTPTimestamp
     index += 8
-    val receive = bytes.sliceArray(index until index + 8).asNtpTimestamp
+    val receive = bytes.sliceArray(index until index + 8).asNTPTimestamp
     index += 8
-    val transmit = bytes.sliceArray(index until index + 8).asNtpTimestamp
-    return NtpPacket(
+    val transmit = bytes.sliceArray(index until index + 8).asNTPTimestamp
+    return NTPPacket(
       leapIndicator,
       versionNumber,
       mode,
@@ -60,7 +60,7 @@ internal class NtpPacketDeserializer {
   private val Byte.asUnsignedInt: Int
     get() = toUByte().toInt()
 
-  private val ByteArray.asNtpIntervalToInterval: Duration
+  private val ByteArray.asNTPIntervalToInterval: Duration
     get() {
       var index = 0
       val seconds = (this[index++].asUnsignedInt shl 8) + this[index++].asUnsignedInt
@@ -72,7 +72,7 @@ internal class NtpPacketDeserializer {
   private val Byte.asUnsignedLong: Long
     get() = toUByte().toLong()
 
-  private val ByteArray.asNtpTimestamp: NtpTimestamp
+  private val ByteArray.asNTPTimestamp: NTPTimestamp
     get() {
       var index = 0
       val ntpMillis = (this[index++].asUnsignedLong shl 56) or
@@ -83,7 +83,7 @@ internal class NtpPacketDeserializer {
         (this[index++].asUnsignedLong shl 16) or
         (this[index++].asUnsignedLong shl 8) or
         this[index].asUnsignedLong
-      return NtpTimestamp(ntpMillis.milliseconds)
+      return NTPTimestamp(ntpMillis.milliseconds)
     }
 
   companion object {

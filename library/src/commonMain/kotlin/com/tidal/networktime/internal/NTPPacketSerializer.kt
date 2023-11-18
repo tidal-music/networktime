@@ -2,8 +2,8 @@ package com.tidal.networktime.internal
 
 import kotlin.time.Duration
 
-internal class NtpPacketSerializer {
-  operator fun invoke(ntpPacket: NtpPacket) = ntpPacket.run {
+internal class NTPPacketSerializer {
+  operator fun invoke(ntpPacket: NTPPacket) = ntpPacket.run {
     ByteArray(48).apply {
       set(0, ((0 shl 6) or (versionNumber shl 3) or mode).toByte())
       transmitEpochTimestamp.ntpTime

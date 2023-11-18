@@ -9,7 +9,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * non-computed property.
  */
 @JvmInline
-internal value class NtpTimestamp(val ntpTime: Duration) {
+internal value class NTPTimestamp(val ntpTime: Duration) {
   val asEpochTimestamp: EpochTimestamp
     get() {
       val ntpTimeValue = ntpTime.inWholeMilliseconds
@@ -18,9 +18,9 @@ internal value class NtpTimestamp(val ntpTime: Duration) {
       val mostSignificantBit = seconds and 0x80000000L
       return (
         if (mostSignificantBit == 0L) {
-          NtpPacket.NTP_TIMESTAMP_BASE_WITH_EPOCH_MSB_0_MILLISECONDS
+          NTPPacket.NTP_TIMESTAMP_BASE_WITH_EPOCH_MSB_0_MILLISECONDS
         } else {
-          NtpPacket.NTP_TIMESTAMP_BASE_WITH_EPOCH_MSB_1_MILLISECONDS
+          NTPPacket.NTP_TIMESTAMP_BASE_WITH_EPOCH_MSB_1_MILLISECONDS
         } + seconds * 1000 + fraction
         ).milliseconds.let { EpochTimestamp(it) }
     }

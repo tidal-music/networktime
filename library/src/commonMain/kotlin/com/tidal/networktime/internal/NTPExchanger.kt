@@ -2,22 +2,22 @@ package com.tidal.networktime.internal
 
 import kotlin.time.Duration
 
-internal class NtpExchanger(
+internal class NTPExchanger(
   private val referenceClock: KotlinXDateTimeSystemClock,
-  private val ntpPacketSerializer: NtpPacketSerializer,
-  private val ntpPacketDeserializer: NtpPacketDeserializer,
+  private val ntpPacketSerializer: NTPPacketSerializer,
+  private val ntpPacketDeserializer: NTPPacketDeserializer,
 ) {
   operator fun invoke(
     address: String,
     queryTimeout: Duration,
     ntpVersion: UByte,
-  ): NtpExchangeResult? {
-    val ntpUdpSocketOperations = NtpUdpSocketOperations()
+  ): NTPExchangeResult? {
+    val ntpUdpSocketOperations = NTPUDPSocketOperations()
     return try {
       ntpUdpSocketOperations.prepareSocket(queryTimeout.inWholeMilliseconds)
-      val ntpPacket = NtpPacket(versionNumber = ntpVersion.toInt(), mode = NTP_MODE_CLIENT)
+      val ntpPacket = NTPPacket(versionNumber = ntpVersion.toInt(), mode = NTP_MODE_CLIENT)
       val requestTime = referenceClock.referenceEpochTime
-      ntpPacket.transmitEpochTimestamp = EpochTimestamp(requestTime).asNtpTimestamp
+      ntpPacket.transmitEpochTimestamp = EpochTimestamp(requestTime).asNTPTimestamp
       val buffer = ntpPacketSerializer(ntpPacket)
       ntpUdpSocketOperations.exchangePacketInPlace(
         buffer,
@@ -25,7 +25,7 @@ internal class NtpExchanger(
         NTP_PORT_NUMBER,
       )
       val returnTime = referenceClock.referenceEpochTime
-      ntpPacketDeserializer(buffer)?.let { NtpExchangeResult(returnTime, it) }
+      ntpPacketDeserializer(buffer)?.let { NTPExchangeResult(returnTime, it) }
     } catch (_: Throwable) {
       null
     } finally {

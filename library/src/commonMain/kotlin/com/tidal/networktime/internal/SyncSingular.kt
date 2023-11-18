@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 
 internal class SyncSingular(
   private val ntpServers: Iterable<NTPServer>,
-  private val ntpExchanger: NtpExchanger,
+  private val ntpExchanger: NTPExchanger,
   private val referenceClock: KotlinXDateTimeSystemClock,
   private val mutableState: MutableState,
   private val addressResolver: AddressResolver = AddressResolver(),
@@ -17,7 +17,7 @@ internal class SyncSingular(
   suspend operator fun invoke() {
     val selectedResult = ntpServers.map {
       withContext(currentCoroutineContext()) {
-        async { pickNtpPacketWithShortestRoundTrip(it) }
+        async { pickNTPPacketWithShortestRoundTrip(it) }
       }
     }.flatMap {
       it.await()
@@ -36,7 +36,7 @@ internal class SyncSingular(
     )
   }
 
-  private suspend fun pickNtpPacketWithShortestRoundTrip(ntpServer: NTPServer) = with(ntpServer) {
+  private suspend fun pickNTPPacketWithShortestRoundTrip(ntpServer: NTPServer) = with(ntpServer) {
     addressResolver(name, addressFamilies).map { resolvedAddress ->
       (1..queriesPerResolvedAddress).mapNotNull {
         val ret = ntpExchanger(

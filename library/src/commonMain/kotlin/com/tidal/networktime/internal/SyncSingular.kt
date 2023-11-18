@@ -58,7 +58,14 @@ internal class SyncSingular(
         if (it.toShort() != queriesPerResolvedAddress) {
           delay(waitBetweenResolvedAddressQueries)
         }
-        ret
+        if (
+          ret?.ntpPacket?.run { rootDelay <= maxRootDelay && rootDispersion <= maxRootDispersion }
+          == true
+        ) {
+          ret
+        } else {
+          null
+        }
       }
         .takeIf { it.isNotEmpty() }
         ?.minBy { it.roundTripDelay }

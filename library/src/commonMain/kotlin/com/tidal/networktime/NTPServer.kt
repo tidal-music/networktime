@@ -16,6 +16,10 @@ import kotlin.time.Duration.Companion.seconds
  * @param waitBetweenResolvedAddressQueries The amount of time to wait before consecutive requests
  * to the same resolved address.
  * @param ntpVersion The version number to write in packets.
+ * @param maxRootDelay The maximum delay to accept a packet. Packets with a root delay higher than
+ * this will be discarded.
+ * @param maxRootDispersion The maximum root dispersion to accept a packet. Packets with a root
+ * dispersion higher than this will be discarded.
  */
 class NTPServer(
   val name: String,
@@ -24,4 +28,6 @@ class NTPServer(
   val queriesPerResolvedAddress: Short = 3,
   val waitBetweenResolvedAddressQueries: Duration = 2.seconds,
   val ntpVersion: NTPVersion = NTPVersion.FOUR,
+  val maxRootDelay: Duration = Duration.INFINITE,
+  val maxRootDispersion: Duration = Duration.INFINITE,
 )

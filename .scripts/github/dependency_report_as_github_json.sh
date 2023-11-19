@@ -39,7 +39,7 @@ if [ -z "${SOURCE_LOCATION+x}" ]; then
 fi
 
 JSON=$(jq --null-input \
---argjson VERSION 0 \
+--argjson VERSION "$(git rev-list --count HEAD)" \
 --arg SHA "$GITHUB_SHA" \
 --arg REF "$GITHUB_REF" \
 --arg CORRELATOR "$GITHUB_WORKFLOW"_"$GITHUB_JOB" \

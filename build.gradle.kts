@@ -8,6 +8,7 @@ buildscript {
     classpath(kotlin("gradle-plugin", version = kotlinVersion))
     classpath(kotlin("serialization", version = kotlinVersion))
     classpath("com.android.tools.build:gradle:8.1.4")
+    classpath("org.jetbrains.compose:compose-gradle-plugin:1.5.10")
   }
 }
 

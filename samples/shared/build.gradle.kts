@@ -1,11 +1,9 @@
 plugins {
   kotlin("multiplatform")
-  id("org.jetbrains.compose") version "1.5.1"
+  id("org.jetbrains.compose") version "1.5.10"
 }
 
 kotlin {
-  targetHierarchy.default()
-
   jvm()
   listOf(
     iosX64(),

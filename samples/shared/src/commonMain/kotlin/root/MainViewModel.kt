@@ -31,6 +31,7 @@ class MainViewModel {
 
   init {
     toggleSynchronization()
+    @Suppress("OPT_IN_USAGE")
     GlobalScope.launch {
       while (true) {
         publishState()

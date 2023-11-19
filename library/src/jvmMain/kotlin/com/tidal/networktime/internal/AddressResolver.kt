@@ -4,6 +4,7 @@ import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 internal actual class AddressResolver {
   actual operator fun invoke(
     address: String,

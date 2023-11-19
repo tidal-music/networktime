@@ -7,8 +7,6 @@ plugins {
 group = "com.tidal.network-time"
 
 kotlin {
-  targetHierarchy.default()
-
   jvm()
   androidTarget {
     compilations.all {
@@ -31,6 +29,8 @@ kotlin {
     }
   }
 
+  applyDefaultHierarchyTemplate()
+
   sourceSets {
     commonMain.get().dependencies {
       api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
@@ -38,10 +38,7 @@ kotlin {
       implementation("com.squareup.okio:okio:3.6.0")
       implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.6.1")
     }
-    val jvmMain by getting {}
-    val androidMain by getting {
-      dependsOn(jvmMain)
-    }
+    androidMain.get().dependsOn(jvmMain.get())
   }
 }
 

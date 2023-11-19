@@ -4,6 +4,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 internal actual class NTPUDPSocketOperations {
   private var datagramSocket: DatagramSocket? = null
 

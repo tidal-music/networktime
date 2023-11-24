@@ -20,6 +20,7 @@ import kotlin.time.Duration.Companion.seconds
  * this will be discarded.
  * @param maxRootDispersion The maximum root dispersion to accept a packet. Packets with a root
  * dispersion higher than this will be discarded.
+ * @param dnsResolutionTimeout The timeout for DNS lookup for addresses from [name].
  */
 class NTPServer(
   val name: String,
@@ -30,4 +31,5 @@ class NTPServer(
   val ntpVersion: NTPVersion = NTPVersion.FOUR,
   val maxRootDelay: Duration = Duration.INFINITE,
   val maxRootDispersion: Duration = Duration.INFINITE,
+  val dnsResolutionTimeout: Duration = 30.seconds,
 )

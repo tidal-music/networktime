@@ -3,10 +3,12 @@ package com.tidal.networktime.internal
 import com.tidal.networktime.AddressFamily
 import com.tidal.networktime.NTPServer
 import com.tidal.networktime.NTPVersion
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 internal class SyncSingular(
   private val ntpServers: Iterable<NTPServer>,
@@ -17,7 +19,7 @@ internal class SyncSingular(
 ) {
   suspend operator fun invoke() {
     val selectedResult = ntpServers.map {
-      withContext(currentCoroutineContext()) {
+      withContext(Dispatchers.IO) {
         async { pickNTPPacketWithShortestRoundTrip(it) }
       }
     }.flatMap {
@@ -39,38 +41,41 @@ internal class SyncSingular(
 
   private suspend fun pickNTPPacketWithShortestRoundTrip(ntpServer: NTPServer) = with(ntpServer) {
     try {
-      addressResolver(
-        name,
-        AddressFamily.INET in addressFamilies,
-        AddressFamily.INET6 in addressFamilies,
-      ).map { resolvedAddress ->
-        (1..queriesPerResolvedAddress).mapNotNull {
-          val ret = ntpExchanger(
-            resolvedAddress,
-            queryTimeout,
-            when (ntpVersion) {
-              NTPVersion.ZERO -> 0U
-              NTPVersion.ONE -> 1U
-              NTPVersion.TWO -> 2U
-              NTPVersion.THREE -> 3U
-              NTPVersion.FOUR -> 4U
-            },
-          )
-          if (it.toShort() != queriesPerResolvedAddress) {
-            delay(waitBetweenResolvedAddressQueries)
+      (withTimeoutOrNull(dnsResolutionTimeout) {
+        addressResolver(
+          name,
+          AddressFamily.INET in addressFamilies,
+          AddressFamily.INET6 in addressFamilies,
+        )
+      } ?: emptySet())
+        .map { resolvedAddress ->
+          (1..queriesPerResolvedAddress).mapNotNull {
+            val ret = ntpExchanger(
+              resolvedAddress,
+              queryTimeout,
+              when (ntpVersion) {
+                NTPVersion.ZERO -> 0U
+                NTPVersion.ONE -> 1U
+                NTPVersion.TWO -> 2U
+                NTPVersion.THREE -> 3U
+                NTPVersion.FOUR -> 4U
+              },
+            )
+            if (it.toShort() != queriesPerResolvedAddress) {
+              delay(waitBetweenResolvedAddressQueries)
+            }
+            if (
+              ret?.ntpPacket?.run { rootDelay <= maxRootDelay && rootDispersion <= maxRootDispersion }
+              == true
+            ) {
+              ret
+            } else {
+              null
+            }
           }
-          if (
-            ret?.ntpPacket?.run { rootDelay <= maxRootDelay && rootDispersion <= maxRootDispersion }
-            == true
-          ) {
-            ret
-          } else {
-            null
-          }
+            .takeIf { it.isNotEmpty() }
+            ?.minBy { it.roundTripDelay }
         }
-          .takeIf { it.isNotEmpty() }
-          ?.minBy { it.roundTripDelay }
-      }
     } catch (_: Throwable) {
       emptySet()
     }

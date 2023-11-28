@@ -8,7 +8,7 @@ internal class NTPExchanger(
   private val ntpPacketDeserializer: NTPPacketDeserializer,
 ) {
   operator fun invoke(
-    address: String,
+    name: String,
     queryTimeout: Duration,
     ntpVersion: UByte,
   ): NTPExchangeResult? {
@@ -21,7 +21,7 @@ internal class NTPExchanger(
       val buffer = ntpPacketSerializer(ntpPacket)
       ntpUdpSocketOperations.exchangePacketInPlace(
         buffer,
-        address,
+        name,
         NTP_PORT_NUMBER,
       )
       val returnTime = referenceClock.referenceEpochTime

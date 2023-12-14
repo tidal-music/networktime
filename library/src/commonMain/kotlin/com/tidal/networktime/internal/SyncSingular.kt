@@ -1,8 +1,8 @@
 package com.tidal.networktime.internal
 
-import com.tidal.networktime.AddressFamily
 import com.tidal.networktime.NTPServer
 import com.tidal.networktime.NTPVersion
+import com.tidal.networktime.ProtocolFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
@@ -14,7 +14,7 @@ internal class SyncSingular(
   private val ntpExchanger: NTPExchanger,
   private val referenceClock: KotlinXDateTimeSystemClock,
   private val synchronizationResultProcessor: SynchronizationResultProcessor,
-  private val nameResolver: NameResolver = NameResolver(),
+  private val hostNameResolver: HostNameResolver = HostNameResolver(),
 ) {
   suspend operator fun invoke() {
     val selectedResult = ntpServers.map {
@@ -40,16 +40,18 @@ internal class SyncSingular(
 
   private suspend fun pickNTPPacketWithShortestRoundTrip(ntpServer: NTPServer) = with(ntpServer) {
     try {
-      nameResolver(
-        name,
+      hostNameResolver(
+        hostName,
         dnsResolutionTimeout,
-        AddressFamily.INET in addressFamilies,
-        AddressFamily.INET6 in addressFamilies,
-      ).map { resolvedAddress ->
+        ProtocolFamily.INET in protocolFamilies,
+        ProtocolFamily.INET6 in protocolFamilies,
+      ).map { (resolvedName, resolvedProtocolFamily) ->
         (1..queriesPerResolvedAddress).mapNotNull {
           val ret = ntpExchanger(
-            resolvedAddress,
-            queryTimeout,
+            resolvedName,
+            resolvedProtocolFamily,
+            queryConnectTimeout,
+            queryReadTimeout,
             when (ntpVersion) {
               NTPVersion.ZERO -> 0U
               NTPVersion.ONE -> 1U
@@ -58,7 +60,7 @@ internal class SyncSingular(
               NTPVersion.FOUR -> 4U
             },
           )
-          if (it.toShort() != queriesPerResolvedAddress) {
+          if (it != queriesPerResolvedAddress) {
             delay(waitBetweenResolvedAddressQueries)
           }
           if (

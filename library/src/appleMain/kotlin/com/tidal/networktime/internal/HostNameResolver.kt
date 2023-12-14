@@ -1,13 +1,17 @@
 package com.tidal.networktime.internal
 
+import com.tidal.networktime.ProtocolFamily
 import kotlinx.cinterop.BooleanVar
+import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.alloc
+import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.asStableRef
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
+import kotlinx.cinterop.readValue
 import kotlinx.cinterop.reinterpret
 import kotlinx.cinterop.staticCFunction
 import kotlinx.cinterop.toKString
@@ -30,27 +34,31 @@ import platform.CoreFoundation.kCFAllocatorDefault
 import platform.Foundation.CFBridgingRelease
 import platform.Foundation.CFBridgingRetain
 import platform.Foundation.NSString
+import platform.darwin.inet_ntoa
+import platform.darwin.inet_ntop
 import platform.posix.AF_INET
 import platform.posix.AF_INET6
 import platform.posix.sockaddr
+import platform.posix.sockaddr_in
+import platform.posix.sockaddr_in6
 import kotlin.time.Duration
 
 @OptIn(ExperimentalForeignApi::class)
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-internal actual class NameResolver {
+internal actual class HostNameResolver {
   private var cfHost: CFHostRef? = null
   private var hostReference: CFTypeRef? = null
   private var userDataRef: StableRef<UserData>? = null
 
   actual suspend operator fun invoke(
-    name: String,
+    hostName: String,
     timeout: Duration,
-    includeIPv4: Boolean,
-    includeIPv6: Boolean,
-  ): Iterable<String> {
-    var ret: Iterable<String>? = emptySet()
+    includeINET: Boolean,
+    includeINET6: Boolean,
+  ): Iterable<Pair<String, ProtocolFamily>> {
+    var ret: Iterable<Pair<String, ProtocolFamily>>? = emptySet()
     try {
-      ret = withTimeoutOrNull(timeout) { invokeInternal(name, includeIPv4, includeIPv6) }
+      ret = withTimeoutOrNull(timeout) { invokeInternal(hostName, includeINET, includeINET6) }
     } finally {
       cfHost
         ?.takeIf { ret == null }
@@ -64,13 +72,13 @@ internal actual class NameResolver {
   }
 
   private fun invokeInternal(
-    name: String,
-    includeIPv4: Boolean,
-    includeIPv6: Boolean,
-  ): Iterable<String> {
+    hostName: String,
+    includeINET: Boolean,
+    includeINET6: Boolean,
+  ): Iterable<Pair<String, ProtocolFamily>> {
     val callback: CFHostClientCallBack = staticCFunction { host, _, _, info ->
       val addresses = memScoped {
-        val hasBeenResolved = alloc<BooleanVar>().apply {
+        val hasBeenResolved = alloc<BooleanVar> {
           value = false
         }
         CFHostGetAddressing(host!!, hasBeenResolved.ptr).takeIf { hasBeenResolved.value }
@@ -79,25 +87,43 @@ internal actual class NameResolver {
       val userData = info!!.asStableRef<UserData>().get()
       val addressCount = CFArrayGetCount(addresses)
       userData.resolvedAddresses = (0 until addressCount).mapNotNull {
-        CFArrayGetValueAtIndex(addresses, it)
+        val it = CFArrayGetValueAtIndex(addresses, it)
           ?.reinterpret<sockaddr>()
           ?.pointed
           ?.takeIf {
             when (it.sa_family.toInt()) {
-              AF_INET -> userData.includeIPv4
-              AF_INET6 -> userData.includeIPv6
+              AF_INET -> userData.includeINET
+              AF_INET6 -> userData.includeINET6
               else -> false
             }
+          }?.run {
+            when (sa_family.toInt()) {
+              AF_INET -> reinterpret<sockaddr_in>()
+              AF_INET6 -> reinterpret<sockaddr_in6>()
+              else -> false
+            }
+          } ?: return@mapNotNull null
+        return@mapNotNull when (it) {
+          is sockaddr_in -> inet_ntoa(it.sin_addr.readValue())!!.toKString() to ProtocolFamily.INET
+
+          is sockaddr_in6 -> {
+            val addressString: String = memScoped {
+              val buffer = allocArray<ByteVar>(it.sin6_len.toInt())
+              inet_ntop(AF_INET6, it.sin6_addr.readValue(), buffer, it.sin6_len.toUInt())
+              buffer.toKString()
+            }
+            addressString to ProtocolFamily.INET6
           }
-      }.map {
-        it.sa_data.toKString()
+
+          else -> null
+        }
       }
     }
-    hostReference = CFBridgingRetain(name as NSString)
-    val cfHost = CFHostCreateWithName(kCFAllocatorDefault, hostReference!! as CFStringRef)
-    userDataRef = StableRef.create(UserData(includeIPv4, includeIPv6))
+    hostReference = CFBridgingRetain(hostName as NSString)
+    cfHost = CFHostCreateWithName(kCFAllocatorDefault, hostReference!! as CFStringRef)
+    userDataRef = StableRef.create(UserData(includeINET, includeINET6))
     memScoped {
-      val clientContext = alloc<CFHostClientContext>().apply {
+      val clientContext = alloc<CFHostClientContext> {
         version = 0
         info = userDataRef!!.asCPointer()
         retain = null
@@ -118,10 +144,7 @@ internal actual class NameResolver {
     userDataRef = null
   }
 
-  private class UserData(
-    val includeIPv4: Boolean,
-    val includeIPv6: Boolean,
-  ) {
-    var resolvedAddresses: Iterable<String> = emptySet()
+  private class UserData(val includeINET: Boolean, val includeINET6: Boolean) {
+    var resolvedAddresses: Iterable<Pair<String, ProtocolFamily>> = emptySet()
   }
 }

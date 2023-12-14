@@ -1,9 +1,9 @@
 package com.tidal.networktime
 
 /**
- * A designation of address families to discriminate resolved addresses on.
+ * A designation of protocol families to discriminate resolved addresses on.
  */
-enum class AddressFamily {
+enum class ProtocolFamily {
   /**
    * IPv4.
    */

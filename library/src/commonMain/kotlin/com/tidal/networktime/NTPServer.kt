@@ -6,10 +6,13 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Describes a host name that can resolve to any number of NTP unicast servers.
  *
- * @param queryTimeout The timeout for receiving responses from each of the servers resolved from
- * [name].
- * @param addressFamilies Can be used for filtering addresses resolved from [name] based on address
- * family.
+ * @param hostName The host name.
+ * @param queryConnectTimeout The per-server timeout for connecting to each of the servers resolved
+ * from [hostName].
+ * @param queryReadTimeout The per-server timeout for receiving responses from each of the servers
+ * resolved from [hostName].
+ * @param protocolFamilies Can be used for filtering addresses resolved from [hostName] based on
+ * address family.
  * @param queriesPerResolvedAddress The amount of queries to perform to each resolved address. More
  * queries may or may not increase precision, but they will make synchronization take longer and
  * also cause more server load.
@@ -20,13 +23,14 @@ import kotlin.time.Duration.Companion.seconds
  * this will be discarded.
  * @param maxRootDispersion The maximum root dispersion to accept a packet. Packets with a root
  * dispersion higher than this will be discarded.
- * @param dnsResolutionTimeout The timeout for DNS lookup for addresses from [name].
+ * @param dnsResolutionTimeout The timeout for DNS lookup for addresses from [hostName].
  */
 class NTPServer(
-  val name: String,
-  val queryTimeout: Duration = 5.seconds,
-  vararg val addressFamilies: AddressFamily = arrayOf(AddressFamily.INET),
-  val queriesPerResolvedAddress: Short = 3,
+  val hostName: String,
+  val queryConnectTimeout: Duration = 5.seconds,
+  val queryReadTimeout: Duration = 5.seconds,
+  vararg val protocolFamilies: ProtocolFamily = arrayOf(ProtocolFamily.INET),
+  val queriesPerResolvedAddress: Int = 3,
   val waitBetweenResolvedAddressQueries: Duration = 2.seconds,
   val ntpVersion: NTPVersion = NTPVersion.FOUR,
   val maxRootDelay: Duration = Duration.INFINITE,

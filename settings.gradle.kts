@@ -1,10 +1,10 @@
+import java.nio.file.Paths
+
 rootProject.name = "network-time"
 
 include("library")
-file("samples").apply {
-  list { file, _ -> file.isDirectory }!!
-    .forEach {
-      include(":$it")
-      project(":$it").projectDir = toPath().resolve(it).toFile()
-    }
-}
+listOf("android", "desktop", "shared")
+  .forEach {
+    include(":samples-$it")
+    project(":samples-$it").projectDir = Paths.get("samples").resolve(it).toFile()
+  }

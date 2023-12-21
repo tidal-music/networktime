@@ -11,6 +11,7 @@ kotlin {
   ).forEach {
     it.binaries.framework {
       baseName = project.name
+      isStatic = true
     }
   }
 

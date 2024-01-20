@@ -3,8 +3,11 @@ import java.nio.file.Paths
 rootProject.name = "network-time"
 
 include("library")
-listOf("android", "desktop", "shared")
+listOf("android", "jvm", "shared")
   .forEach {
-    include(":samples-$it")
-    project(":samples-$it").projectDir = Paths.get("samples").resolve(it).toFile()
+    include(":samples-multiplatform-kotlin-$it")
+    project(":samples-multiplatform-kotlin-$it").projectDir = Paths.get("samples")
+      .resolve("multiplatform-kotlin")
+      .resolve(it)
+      .toFile()
   }

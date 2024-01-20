@@ -1,0 +1,6 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="samples-multiplatform-kotlin-jvm-jvm">
+    <output-path>$PROJECT_DIR$/samples/multiplatform-kotlin/jvm/build/libs</output-path>
+    <root id="archive" name="samples-multiplatform-kotlin-jvm-jvm.jar" />
+  </artifact>
+</component>

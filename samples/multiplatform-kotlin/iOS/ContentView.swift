@@ -1,4 +1,4 @@
-import samples_shared
+import samples_multiplatform_kotlin_shared
 import SwiftUI
 
 struct ComposeView: UIViewControllerRepresentable {

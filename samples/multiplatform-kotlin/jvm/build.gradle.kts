@@ -11,7 +11,7 @@ kotlin {
   }
   sourceSets {
     jvmMain.get().dependencies {
-      implementation(project(":samples-shared"))
+      implementation(project(":samples-multiplatform-kotlin-shared"))
       implementation(compose.desktop.currentOs)
     }
   }

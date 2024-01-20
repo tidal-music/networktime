@@ -6,12 +6,14 @@ plugins {
 kotlin {
   jvm()
   listOf(
+    macosX64(),
+    macosArm64(),
     iosX64(),
     iosArm64(),
   ).forEach {
     it.binaries.framework {
       baseName = project.name
-      isStatic = true
+      binaryOption("bundleId", "com.tidal.networktime.sample-${it.targetName}")
     }
   }
 

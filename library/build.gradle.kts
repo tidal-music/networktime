@@ -1,6 +1,5 @@
 plugins {
   kotlin("multiplatform")
-  id("com.android.library")
   kotlin("plugin.serialization")
 }
 
@@ -8,13 +7,6 @@ group = "com.tidal.network-time"
 
 kotlin {
   jvm()
-  androidTarget {
-    compilations.all {
-      kotlinOptions {
-        jvmTarget = "1.8"
-      }
-    }
-  }
   listOf(
     macosX64(),
     macosArm64(),
@@ -26,6 +18,8 @@ kotlin {
   ).forEach {
     it.binaries.framework {
       baseName = project.name
+      binaryOption("bundleId", "com.tidal.networktime")
+      isStatic = true
     }
   }
 
@@ -38,15 +32,5 @@ kotlin {
       implementation("com.squareup.okio:okio:3.6.0")
       implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.6.1")
     }
-    androidMain.get().dependsOn(jvmMain.get())
   }
-}
-
-android {
-  compileSdk = 33
-  sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-  defaultConfig {
-    minSdk = 1
-  }
-  namespace = "com.tidal.networktime"
 }

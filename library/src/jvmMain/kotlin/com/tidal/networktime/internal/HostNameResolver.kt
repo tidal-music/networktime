@@ -14,7 +14,7 @@ internal actual class HostNameResolver {
     timeout: Duration,
     includeINET: Boolean,
     includeINET6: Boolean,
-  ): Iterable<Pair<String, ProtocolFamily>> = withTimeoutOrNull(timeout) {
+  ): Iterable<String> = withTimeoutOrNull(timeout) {
     InetAddress.getAllByName(hostName)
   }?.mapNotNull {
     val protocolFamily = when (it) {
@@ -24,7 +24,7 @@ internal actual class HostNameResolver {
     }
     when {
       protocolFamily == ProtocolFamily.INET && includeINET ||
-        protocolFamily == ProtocolFamily.INET6 && includeINET6 -> it.hostAddress to protocolFamily
+        protocolFamily == ProtocolFamily.INET6 && includeINET6 -> it.hostAddress
 
       else -> null
     }

@@ -19,7 +19,9 @@ internal class SynchronizationResultProcessor(
       if (value == null && backupFilePath != null) {
         try {
           fileSystem.read(backupFilePath) {
-            mutableState.synchronizationResult = Json.decodeFromBufferedSource(this)
+            val readValue = Json.decodeFromBufferedSource<SynchronizationResult?>(this)
+            mutableState.synchronizationResult = readValue
+            return readValue
           }
         } catch (_: Throwable) {
         }

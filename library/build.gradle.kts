@@ -11,10 +11,10 @@ kotlin {
     macosX64(),
     macosArm64(),
     iosX64(),
+    iosArm64(),
     tvosSimulatorArm64(),
     tvosX64(),
     tvosArm64(),
-    iosArm64(),
   ).forEach {
     it.binaries.framework {
       baseName = project.name

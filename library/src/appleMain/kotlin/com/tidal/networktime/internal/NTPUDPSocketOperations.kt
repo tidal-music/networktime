@@ -1,158 +1,105 @@
 package com.tidal.networktime.internal
 
-import com.tidal.networktime.ProtocolFamily
+import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.StableRef
-import kotlinx.cinterop.alloc
-import kotlinx.cinterop.asStableRef
+import kotlinx.cinterop.allocArray
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.pointed
-import kotlinx.cinterop.ptr
 import kotlinx.cinterop.refTo
 import kotlinx.cinterop.reinterpret
-import kotlinx.cinterop.sizeOf
-import kotlinx.cinterop.staticCFunction
-import kotlinx.cinterop.toCPointer
-import kotlinx.cinterop.toLong
-import kotlinx.cinterop.value
-import kotlinx.coroutines.delay
+import kotlinx.cinterop.set
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
-import platform.CoreFoundation.CFDataCreate
-import platform.CoreFoundation.CFDataGetBytes
-import platform.CoreFoundation.CFDataGetLength
-import platform.CoreFoundation.CFDataRefVar
-import platform.CoreFoundation.CFRangeMake
-import platform.CoreFoundation.CFSocketCallBack
-import platform.CoreFoundation.CFSocketConnectToAddress
-import platform.CoreFoundation.CFSocketContext
-import platform.CoreFoundation.CFSocketCreate
-import platform.CoreFoundation.CFSocketInvalidate
-import platform.CoreFoundation.CFSocketRef
-import platform.CoreFoundation.CFSocketSendData
-import platform.CoreFoundation.kCFAllocatorDefault
-import platform.CoreFoundation.kCFSocketDataCallBack
-import platform.darwin.inet_aton
-import platform.darwin.inet_pton
-import platform.posix.AF_INET
-import platform.posix.AF_INET6
-import platform.posix.IPPROTO_UDP
-import platform.posix.PF_INET
-import platform.posix.PF_INET6
-import platform.posix.SIGPIPE
-import platform.posix.SIG_IGN
-import platform.posix.SOCK_DGRAM
-import platform.posix.signal
-import platform.posix.sockaddr_in
-import platform.posix.sockaddr_in6
+import platform.Network.NW_CONNECTION_FINAL_MESSAGE_CONTEXT
+import platform.Network.NW_PARAMETERS_DEFAULT_CONFIGURATION
+import platform.Network.NW_PARAMETERS_DISABLE_PROTOCOL
+import platform.Network.nw_connection_create
+import platform.Network.nw_connection_force_cancel
+import platform.Network.nw_connection_receive
+import platform.Network.nw_connection_send
+import platform.Network.nw_connection_set_queue
+import platform.Network.nw_connection_set_state_changed_handler
+import platform.Network.nw_connection_start
+import platform.Network.nw_connection_state_cancelled
+import platform.Network.nw_connection_state_failed
+import platform.Network.nw_connection_state_ready
+import platform.Network.nw_connection_state_t
+import platform.Network.nw_connection_t
+import platform.Network.nw_endpoint_create_host
+import platform.Network.nw_error_t
+import platform.Network.nw_parameters_create_secure_udp
+import platform.darwin._dispatch_data_destructor_free
+import platform.darwin.dispatch_data_apply
+import platform.darwin.dispatch_data_create
+import platform.darwin.dispatch_data_t
+import platform.darwin.dispatch_get_current_queue
+import platform.posix.memcpy
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
 
-@OptIn(ExperimentalForeignApi::class)
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 internal actual class NTPUDPSocketOperations {
-  private var cfSocket: CFSocketRef? = null
-  private var userDataRef: StableRef<UserData>? = null
+  private var connection: nw_connection_t = null
 
-  actual suspend fun prepareSocket(
-    address: String,
-    protocolFamily: ProtocolFamily,
-    portNumber: Int,
-    connectTimeout: Duration,
-  ) {
-    userDataRef = StableRef.create(UserData())
-    val callback: CFSocketCallBack = staticCFunction { _, callbackType, _, data, info ->
-      val userData = info!!.asStableRef<UserData>().get()
-      if (callbackType != kCFSocketDataCallBack) {
-        return@staticCFunction
-      }
-      val reinterpretedData = data!!.reinterpret<CFDataRefVar>().pointed.value
-      val length = CFDataGetLength(reinterpretedData)
-      val range = CFRangeMake(0, length)
-      val bridgeBuffer = UByteArray(length.toInt())
-      CFDataGetBytes(reinterpretedData, range, bridgeBuffer.refTo(0))
-      userData.apply {
-        buffer = bridgeBuffer.toByteArray()
-        exchangeCompleted = true
-      }
-    }
-    signal(SIGPIPE, SIG_IGN)
-    cfSocket = memScoped {
-      val socketContext = alloc<CFSocketContext> {
-        version = 0
-        info = userDataRef!!.asCPointer()
-        retain = null
-        release = null
-        copyDescription = null
-      }
-      val socket = CFSocketCreate(
-        kCFAllocatorDefault,
-        when (protocolFamily) {
-          ProtocolFamily.INET -> PF_INET
-          ProtocolFamily.INET6 -> PF_INET6
-        },
-        SOCK_DGRAM,
-        IPPROTO_UDP,
-        kCFSocketDataCallBack,
-        callback,
-        socketContext.ptr,
-      )
-      val addrCFDataRef = when (protocolFamily) {
-        ProtocolFamily.INET -> alloc<sockaddr_in> {
-          sin_family = AF_INET.toUByte()
-          sin_port = portNumber.toUShort()
-          inet_aton(address, sin_addr.ptr)
-        }.run {
-          CFDataCreate(kCFAllocatorDefault, ptr.toLong().toCPointer(), sizeOf<sockaddr_in>())
-        }
-
-        ProtocolFamily.INET6 -> {
-          alloc<sockaddr_in6> {
-            sin6_family = AF_INET6.toUByte()
-            sin6_port = portNumber.toUShort()
-            inet_pton(AF_INET6, address, sin6_addr.ptr)
-          }.run {
-            CFDataCreate(kCFAllocatorDefault, ptr.toLong().toCPointer(), sizeOf<sockaddr_in6>())
-          }
-        }
-      }
-      CFSocketConnectToAddress(
-        socket,
-        addrCFDataRef,
-        connectTimeout.toDouble(DurationUnit.MILLISECONDS),
-      )
-      socket
-    }
-  }
-
-  actual suspend fun exchangeInPlace(buffer: ByteArray, readTimeout: Duration) {
-    val bufferCFDataRef = CFDataCreate(
-      kCFAllocatorDefault,
-      buffer.asUByteArray().refTo(0),
-      buffer.size.toLong(),
+  actual suspend fun prepare(address: String, portNumber: Int, connectTimeout: Duration) {
+    val parameters = nw_parameters_create_secure_udp(
+      NW_PARAMETERS_DISABLE_PROTOCOL,
+      NW_PARAMETERS_DEFAULT_CONFIGURATION,
     )
-    CFSocketSendData(
-      cfSocket,
-      null,
-      bufferCFDataRef,
-      Duration.INFINITE.toDouble(DurationUnit.MILLISECONDS),
-    )
-    withTimeout(readTimeout) {
-      while (!userDataRef!!.get().exchangeCompleted) {
-        delay(1.seconds)
+    val endpoint = nw_endpoint_create_host(address, portNumber.toString())
+    connection = nw_connection_create(endpoint, parameters)
+    nw_connection_set_queue(connection, dispatch_get_current_queue())
+    val connectionStateDeferred = CompletableDeferred<nw_connection_state_t>()
+    nw_connection_set_state_changed_handler(connection) { state: nw_connection_state_t, _ ->
+      when (state) {
+        nw_connection_state_ready, nw_connection_state_failed, nw_connection_state_cancelled ->
+          connectionStateDeferred.complete(state)
       }
+    }
+    nw_connection_start(connection)
+    withTimeout(connectTimeout) {
+      assertEquals(nw_connection_state_ready, connectionStateDeferred.await())
     }
   }
 
-  actual fun closeSocket() {
-    CFSocketInvalidate(cfSocket)
-    cfSocket = null
-    userDataRef?.dispose()
-    userDataRef = null
+  @OptIn(ExperimentalForeignApi::class)
+  actual suspend fun exchange(buffer: ByteArray, readTimeout: Duration) {
+    val toSendData = memScoped {
+      val cArray = allocArray<ByteVar>(buffer.size)
+      buffer.forEachIndexed { i, it ->
+        cArray[i] = it
+      }
+      cArray
+    }
+    nw_connection_send(
+      connection,
+      dispatch_data_create(toSendData, buffer.size.convert(), null, _dispatch_data_destructor_free),
+      NW_CONNECTION_FINAL_MESSAGE_CONTEXT,
+      true,
+    ) {
+      assertNull(it)
+    }
+    val connectionReceptionDeferred = CompletableDeferred<dispatch_data_t>()
+    nw_connection_receive(
+      connection,
+      1.convert(),
+      buffer.size.convert(),
+    ) { content: dispatch_data_t, _, _, error: nw_error_t ->
+      assertNull(error)
+      connectionReceptionDeferred.complete(content)
+    }
+    val receivedData = withTimeout(readTimeout) {
+      connectionReceptionDeferred.await()
+    }
+    dispatch_data_apply(receivedData) { _, _, regionPointer, _ ->
+      memcpy(buffer.refTo(0), regionPointer!!.reinterpret<ByteVar>(), buffer.size.convert())
+      false
+    }
   }
 
-  private class UserData {
-    var exchangeCompleted = false
-    var buffer: ByteArray = byteArrayOf()
+  actual fun tearDown() {
+    nw_connection_force_cancel(connection)
+    connection = null
   }
 }

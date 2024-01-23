@@ -3,22 +3,21 @@ package com.tidal.networktime.internal
 import com.tidal.networktime.NTPServer
 import com.tidal.networktime.NTPVersion
 import com.tidal.networktime.ProtocolFamily
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 internal class SyncSingular(
   private val ntpServers: Iterable<NTPServer>,
-  private val ntpExchanger: NTPExchanger,
+  private val ntpExchangeCoordinator: NTPExchangeCoordinator,
   private val referenceClock: KotlinXDateTimeSystemClock,
   private val synchronizationResultProcessor: SynchronizationResultProcessor,
   private val hostNameResolver: HostNameResolver = HostNameResolver(),
 ) {
   suspend operator fun invoke() {
     val selectedResult = ntpServers.map {
-      withContext(Dispatchers.IO) {
+      withContext(currentCoroutineContext()) {
         async { pickNTPPacketWithShortestRoundTrip(it) }
       }
     }.flatMap {
@@ -45,11 +44,10 @@ internal class SyncSingular(
         dnsResolutionTimeout,
         ProtocolFamily.INET in protocolFamilies,
         ProtocolFamily.INET6 in protocolFamilies,
-      ).map { (resolvedName, resolvedProtocolFamily) ->
+      ).map { resolvedName ->
         (1..queriesPerResolvedAddress).mapNotNull {
-          val ret = ntpExchanger(
+          val ret = ntpExchangeCoordinator(
             resolvedName,
-            resolvedProtocolFamily,
             queryConnectTimeout,
             queryReadTimeout,
             when (ntpVersion) {

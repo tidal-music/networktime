@@ -1,11 +1,11 @@
 package com.tidal.networktime.internal
 
-import com.tidal.networktime.ProtocolFamily
 import kotlinx.cinterop.BooleanVar
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.allocArray
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
@@ -51,8 +51,8 @@ internal actual class HostNameResolver {
     timeout: Duration,
     includeINET: Boolean,
     includeINET6: Boolean,
-  ): Iterable<Pair<String, ProtocolFamily>> {
-    var ret: Iterable<Pair<String, ProtocolFamily>>? = emptySet()
+  ): Iterable<String> {
+    var ret: Iterable<String>? = emptySet()
     try {
       ret = withTimeoutOrNull(timeout) { invokeInternal(hostName, includeINET, includeINET6) }
     } finally {
@@ -70,7 +70,7 @@ internal actual class HostNameResolver {
     hostName: String,
     includeINET: Boolean,
     includeINET6: Boolean,
-  ): Iterable<Pair<String, ProtocolFamily>> {
+  ): Iterable<String> {
     hostReference = CFBridgingRetain(hostName as NSString)
     cfHost = CFHostCreateWithName(kCFAllocatorDefault, hostReference as CFStringRef)
     CFHostStartInfoResolution(cfHost, kCFHostAddresses, null)
@@ -82,11 +82,11 @@ internal actual class HostNameResolver {
       addresses.takeIf { hasResolved.value }
       addresses ?: return emptySet()
       val count = CFArrayGetCount(addresses)
-      val ret = mutableSetOf<Pair<String, ProtocolFamily>>()
+      val ret = mutableSetOf<String>()
       (0 until count).forEach {
         val socketAddressData = CFArrayGetValueAtIndex(addresses, it) as CFDataRef
         val sockAddr = CFDataGetBytePtr(socketAddressData)!!.reinterpret<sockaddr>().pointed
-        val addrPrettyToProtocolFamily = when (sockAddr.sa_family.toInt()) {
+        val addrPretty = when (sockAddr.sa_family.toInt()) {
           AF_INET -> {
             if (includeINET) {
               val buffer = allocArray<ByteVar>(INET_ADDRSTRLEN)
@@ -94,9 +94,9 @@ internal actual class HostNameResolver {
                 AF_INET,
                 sockAddr.reinterpret<sockaddr_in>().sin_addr.readValue(),
                 buffer,
-                INET_ADDRSTRLEN.toUInt(),
+                INET_ADDRSTRLEN.convert(),
               )
-              buffer.toKString() to ProtocolFamily.INET
+              buffer.toKString()
             } else {
               null
             }
@@ -109,9 +109,9 @@ internal actual class HostNameResolver {
                 AF_INET6,
                 sockAddr.reinterpret<sockaddr_in6>().sin6_addr.readValue(),
                 buffer,
-                INET6_ADDRSTRLEN.toUInt(),
+                INET6_ADDRSTRLEN.convert(),
               )
-              buffer.toKString() to ProtocolFamily.INET6
+              buffer.toKString()
             } else {
               null
             }
@@ -121,8 +121,8 @@ internal actual class HostNameResolver {
             null
           }
         }
-        if (addrPrettyToProtocolFamily != null) {
-          ret.add(addrPrettyToProtocolFamily)
+        if (addrPretty != null) {
+          ret.add(addrPretty)
         }
       }
       ret
@@ -130,6 +130,7 @@ internal actual class HostNameResolver {
   }
 
   private fun clear() {
+    cfHost?.let { CFRelease(it) }
     cfHost = null
     hostReference?.let { CFRelease(it) }
     hostReference = null

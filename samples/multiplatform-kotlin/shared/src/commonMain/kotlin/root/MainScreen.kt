@@ -54,7 +54,7 @@ fun MainScreen(mainViewModel: MainViewModel) {
         }
         Row(
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.SpaceEvenly,
+          horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.fillMaxWidth(),
         ) {
           Text("Synchronization ${if (state.synchronizationEnabled) "enabled" else "disabled"}")

@@ -10,6 +10,7 @@ kotlin {
     macosArm64(),
     iosX64(),
     iosArm64(),
+    iosSimulatorArm64(),
   ).forEach {
     it.binaries.framework {
       baseName = project.name

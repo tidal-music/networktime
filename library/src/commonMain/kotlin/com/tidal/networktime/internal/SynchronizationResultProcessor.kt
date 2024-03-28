@@ -9,9 +9,9 @@ import okio.Path
 
 @OptIn(ExperimentalSerializationApi::class)
 internal class SynchronizationResultProcessor(
-  val mutableState: MutableState,
-  val backupFilePath: Path?,
-  val fileSystem: FileSystem = FileSystemSupplier().system,
+  private val mutableState: MutableState,
+  private val backupFilePath: Path?,
+  private val fileSystem: FileSystem = FileSystemSupplier().system,
 ) {
   var synchronizationResult: SynchronizationResult?
     get() {

@@ -3,7 +3,7 @@ language = Objective-C
 
 ---
 
-#include <Network/Network.h>
+#import <Network/Network.h>
 #import <Network/connection.h>
 
 // https://stackoverflow.com/a/63050804

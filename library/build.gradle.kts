@@ -22,6 +22,7 @@ kotlin {
       binaryOption("bundleId", "com.tidal.networktime")
       isStatic = true
     }
+    it.compilations.configureEach { cinterops.create("NetworkFrameworkWorkaround") }
   }
 
   applyDefaultHierarchyTemplate()

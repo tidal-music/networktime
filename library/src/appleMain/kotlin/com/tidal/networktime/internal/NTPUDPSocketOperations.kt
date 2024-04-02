@@ -1,7 +1,7 @@
 package com.tidal.networktime.internal
 
-import com.tidal.networktime.internal.network_framework_workaround.nw_connection_send_with_default_context
-import com.tidal.networktime.internal.network_framework_workaround.nw_parameters_create_secure_udp_workaround
+import com.tidal.networktime.internal.network_framework_workaround.nw_connection_send_default_context
+import com.tidal.networktime.internal.network_framework_workaround.nw_parameters_create_secure_udp_disable_protocol
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.convert
@@ -38,7 +38,7 @@ internal actual class NTPUDPSocketOperations {
 
   actual suspend fun prepare(address: String, portNumber: Int, connectTimeout: Duration) {
     println("BEFORE CREATESECUREUDP")
-    val parameters = nw_parameters_create_secure_udp_workaround()
+    val parameters = nw_parameters_create_secure_udp_disable_protocol()
     println("BEFORE CREATEHOST")
     println("Endpoint is $address/$portNumber")
     val endpoint = nw_endpoint_create_host(address, portNumber.toString())
@@ -76,7 +76,7 @@ internal actual class NTPUDPSocketOperations {
       )
     }
     println("BEFORE SEND")
-    nw_connection_send_with_default_context(
+    nw_connection_send_default_context(
       connection,
       data,
       true,

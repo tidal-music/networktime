@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v3.5.3
       - run: .scripts/check_ktlint.sh
   codeql:
-    runs-on: macos-13
+    runs-on: macos-14-xlarge
     permissions:
       actions: read
       contents: read

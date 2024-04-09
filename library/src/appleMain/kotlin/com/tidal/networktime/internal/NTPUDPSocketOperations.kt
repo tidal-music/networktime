@@ -8,7 +8,6 @@ import kotlinx.cinterop.convert
 import kotlinx.cinterop.pin
 import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.withTimeout
 import platform.Network.nw_connection_create
 import platform.Network.nw_connection_force_cancel
 import platform.Network.nw_connection_receive
@@ -29,14 +28,13 @@ import platform.darwin.dispatch_get_current_queue
 import platform.posix.memcpy
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.time.Duration
 
 @OptIn(ExperimentalForeignApi::class)
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 internal actual class NTPUDPSocketOperations {
   private var connection: nw_connection_t = null
 
-  actual suspend fun prepare(address: String, portNumber: Int, connectTimeout: Duration) {
+  actual suspend fun prepare(address: String, portNumber: Int) {
     val parameters = nw_parameters_create_secure_udp_disable_protocol()
     val endpoint = nw_endpoint_create_host(address, portNumber.toString())
     connection = nw_connection_create(endpoint, parameters)
@@ -49,12 +47,10 @@ internal actual class NTPUDPSocketOperations {
       }
     }
     nw_connection_start(connection)
-    withTimeout(connectTimeout) {
-      assertEquals(nw_connection_state_ready, connectionStateDeferred.await())
-    }
+    assertEquals(nw_connection_state_ready, connectionStateDeferred.await())
   }
 
-  actual suspend fun exchange(buffer: ByteArray, readTimeout: Duration) {
+  actual suspend fun exchange(buffer: ByteArray) {
     val data = buffer.pin().run {
       dispatch_data_create(
         addressOf(0),
@@ -79,9 +75,7 @@ internal actual class NTPUDPSocketOperations {
       assertNull(error)
       connectionReceptionDeferred.complete(content)
     }
-    val receivedData = withTimeout(readTimeout) {
-      connectionReceptionDeferred.await()
-    }
+    val receivedData = connectionReceptionDeferred.await()
     buffer.usePinned {
       dispatch_data_apply(receivedData) { _, offset, src, size ->
         memcpy(it.addressOf(offset.toInt()), src, size)

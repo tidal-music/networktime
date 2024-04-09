@@ -1,5 +1,6 @@
 package com.tidal.networktime.internal
 
+import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
 
 internal class NTPExchangeCoordinator(
@@ -15,12 +16,16 @@ internal class NTPExchangeCoordinator(
   ): NTPExchangeResult? {
     val ntpUdpSocketOperations = NTPUDPSocketOperations()
     return try {
-      ntpUdpSocketOperations.prepare(address, NTP_PORT_NUMBER, connectTimeout)
+      withTimeout(connectTimeout) {
+        ntpUdpSocketOperations.prepare(address, NTP_PORT_NUMBER)
+      }
       val ntpPacket = NTPPacket(versionNumber = ntpVersion.toInt(), mode = NTP_MODE_CLIENT)
       val requestTime = referenceClock.referenceEpochTime
       ntpPacket.transmitEpochTimestamp = EpochTimestamp(requestTime).asNTPTimestamp
       val buffer = ntpPacketSerializer(ntpPacket)
-      ntpUdpSocketOperations.exchange(buffer, queryReadTimeout)
+      withTimeout(queryReadTimeout) {
+        ntpUdpSocketOperations.exchange(buffer)
+      }
       val returnTime = referenceClock.referenceEpochTime
       ntpPacketDeserializer(buffer)?.let { NTPExchangeResult(returnTime, it) }
     } catch (_: Throwable) {

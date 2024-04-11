@@ -7,7 +7,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Construct a new SNTP client that can be requested to periodically interact with the provided
+ * Constructs a new SNTP client that can be requested to periodically interact with the provided
  * [ntpServers] to obtain information about their provided time.
  *
  * @param ntpServers Representation of supported unicast NTP sources.

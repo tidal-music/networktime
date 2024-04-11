@@ -1,0 +1,49 @@
+name: Publish
+on:
+  push:
+    tags:
+      - '**'
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  create-github-release:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - run: .scripts/github/release.sh > upload_url
+      - uses: actions/upload-artifact@v4.3.1
+        with:
+          path: upload_url
+  jvm-maven-github:
+    runs-on: macos-14-xlarge
+    needs: [ create-github-release ]
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: ./.github/actions/runGradleTask
+        with:
+          preTaskString: -Pversion=$GITHUB_REF_NAME
+          task: library:publishKotlinMultiplatformPublicationToGithubPackagesRepository
+      - uses: actions/download-artifact@v4.1.4
+        with:
+          name: upload_url
+  attach-xcframework-to-github-release:
+    runs-on: macos-14-xlarge
+    needs: [ create-github-release ]
+    steps:
+      - uses: actions/checkout@v3.5.3
+      - uses: ./.github/actions/runGradleTask
+        with:
+          task: :library:assembleLibraryReleaseXCFramework
+      - run: zip -r Library.xcframework.zip library/build/XCFrameworks/release/library.xcframework
+      - uses: actions/download-artifact@v4.1.4
+        with:
+          name: upload_url
+      - run: UPLOAD_URL=$(cat upload_url | sed "s/{?name,label}/?name=Library-${GITHUB_REF_NAME}.xcframework.zip/")
+      - run: |
+          curl -s \
+          -u ${GITHUB_ACTOR}:${GITHUB_TOKEN} \
+          --header "Accept: application/vnd.github.v3+json" \
+          --header "Content-Type: application/zip" \
+          --data-binary "@Library.xcframework.zip" \
+          --request POST \
+          $UPLOAD_URL

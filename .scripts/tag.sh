@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+
 usage() {
   echo "Usage: $0 -v <version>" >&2
   exit 1
@@ -12,7 +13,7 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
-while getopts ":v" opt; do
+while getopts ":v:" opt; do
   case $opt in
   v)
     VERSION=$OPTARG

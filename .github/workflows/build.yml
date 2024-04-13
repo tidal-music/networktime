@@ -1,5 +1,8 @@
 name: Build
-on: push
+on:
+  push:
+    branches:
+      - '**'
 jobs:
   root:
     runs-on: macos-14-xlarge

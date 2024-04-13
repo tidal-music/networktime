@@ -1,5 +1,8 @@
 name: Static analysis
-on: push
+on:
+  push:
+    branches:
+      - '**'
 jobs:
   ktlint:
     runs-on: ubuntu-22.04

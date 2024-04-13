@@ -9,7 +9,7 @@ kotlin {
     macosX64(),
     macosArm64(),
     iosX64(),
-//    iosArm64(),
+    iosArm64(),
     iosSimulatorArm64(),
   ).forEach {
     it.binaries.framework {

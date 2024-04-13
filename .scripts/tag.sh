@@ -35,6 +35,7 @@ fi
 FILE_CHANGELOG="changelog/$VERSION"
 if [ ! -f "$FILE_CHANGELOG" ]; then
   echo "Changelog file $FILE_CHANGELOG missing"
+  exit 1
 fi
 
 git fetch &&

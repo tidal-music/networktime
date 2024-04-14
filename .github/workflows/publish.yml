@@ -16,7 +16,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - run: exit $(git merge-base --is-ancestor $tag HEAD)
+      - run: exit $(git merge-base --is-ancestor $GITHUB_REF_NAME HEAD)
   create-github-release:
     runs-on: ubuntu-22.04
     needs: [ ensure-tag-is-on-main ]

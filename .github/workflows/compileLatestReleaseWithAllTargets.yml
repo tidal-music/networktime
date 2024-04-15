@@ -1,46 +1,28 @@
-name: Publish
+name: Compile and attach latest release with all targets
 on:
-  push:
-    tags:
-      - '**'
+  schedule:
+    - cron: '* * * * 5'
 permissions:
   contents: write
-  packages: write
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 concurrency:
-  group: ${{ github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
-  ensure-tag-is-on-main:
+  lookup-latest-github-release:
     runs-on: ubuntu-22.04
+    outputs:
+      target: ${{ steps.lookup.outputs.target }}
     steps:
-      - uses: actions/checkout@v3.5.3
-        with:
-          ref: main
-          fetch-depth: 0
-      - run: exit $(git merge-base --is-ancestor $GITHUB_REF_NAME HEAD)
-  jvm-maven-github:
-    runs-on: macos-14-xlarge
-    needs: [ ensure-tag-is-on-main ]
-    steps:
-      - uses: actions/checkout@v3.5.3
-      - uses: ./.github/actions/runGradleTask
-        with:
-          preTaskString: -Pversion=$GITHUB_REF_NAME
-          task: library:publishKotlinMultiplatformPublicationToGithubPackagesRepository
-  create-github-release:
-    runs-on: ubuntu-22.04
-    needs: [ ensure-tag-is-on-main ]
-    steps:
-      - uses: actions/checkout@v3.5.3
-      - run: .scripts/github/release.sh > upload_url
-      - uses: actions/upload-artifact@v4.3.1
-        with:
-          name: upload_url
-          path: upload_url
+      - id: lookup
+        run: |
+          echo "target=$(curl -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq --raw-output '.name')" >> $GITHUB_OUTPUT
   generate-build-matrix:
     runs-on: macos-14-xlarge
-    needs: [ ensure-tag-is-on-main ]
     outputs:
       xcodeversions: ${{ steps.generate.outputs.xcodeversions }}
     steps:
@@ -55,7 +37,7 @@ jobs:
           echo "xcodeversions=$jsonString" >> $GITHUB_OUTPUT
   attach-xcframework-to-github-release:
     runs-on: macos-14-xlarge
-    needs: [ create-github-release, generate-build-matrix ]
+    needs: [ lookup-latest-github-release, generate-build-matrix ]
     strategy:
       fail-fast: false
       matrix:
@@ -63,5 +45,5 @@ jobs:
     steps:
       - uses: ./.github/actions/attachXcFrameworkAndChecksum
         with:
-          target: ${{ github.ref_name }}
+          target: ${{ needs.lookup-latest-github-release.outputs.target }}
           xcodeversion: ${{ matrix.xcodeversion }}

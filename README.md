@@ -23,7 +23,10 @@ dependencies {
 <summary><b>SwiftPM</b></summary>
 
 ```swift
-.package(url: "https://github.com/tidal-music/network-time-package.swift.git", .from("$VERSION"))
+.binaryTarget(
+    url: "https://github.com/tidal-music/network-time/downloads/$VERSION/Library-$VERSION-xcodebuild-${XCODEVERSION}.xcframework.zip",
+    checksum: "Contents of https://github.com/tidal-music/network-time/downloads/$VERSION/Library-$VERSION-xcodebuild-$XCODEVERSION.xcframework.zip.checksum"
+)
 ```
 
 </details>

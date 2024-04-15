@@ -1,0 +1,57 @@
+name: Build Library XcFramework and attach it and its checksum to the requested release
+description: Only if it is not attached already
+inputs:
+  target:
+    description: The release to attach to
+    required: true
+  xcodeversion:
+    description: The Xcode version to configure before compiling
+    required: true
+runs:
+  using: composite
+  steps:
+    - run: |
+        curl -ILs --fail https://github.com/$GITHUB_REPOSITORY/releases/download/${{ inputs.target }}/Library-${{ inputs.target }}-xcodebuild-${{ inputs.xcodeversion }}.xcframework.zip
+        echo ATTACHMENT_FOUND=$? >> $GITHUB_ENV
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      uses: actions/checkout@v3.5.3
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      uses: maxim-lobanov/setup-xcode@v1.6.0
+      with:
+        xcode-version: ${{ inputs.xcodeversion }}
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      uses: ./.github/actions/runGradleTask
+      with:
+        task: :library:assembleLibraryReleaseXCFramework
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      run: zip -r Library.xcframework.zip library/build/XCFrameworks/release/library.xcframework
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      uses: actions/download-artifact@v4.1.4
+      with:
+        name: upload_url
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      run: echo UPLOAD_URL=$(cat upload_url | sed "s/{?name,label}/?name=Library-${{ inputs.target }}-xcodebuild-${{ inputs.xcodeversion }}.xcframework.zip/") >> $GITHUB_ENV
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      run: |
+        curl -s \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer $GITHUB_TOKEN" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          -H "Content-Type: application/octet-stream" \
+          --data-binary "@Library.xcframework.zip" \
+          $UPLOAD_URL
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      run: echo $(swift package compute-checksum Library.xcframework.zip) > checksum
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      run: echo UPLOAD_URL=$(cat upload_url | sed "s/{?name,label}/?name=Library-${{ inputs.target }}-xcodebuild-${{ matrix.xcodeversion }}.xcframework.zip.checksum/") >> $GITHUB_ENV
+    - if: ${{ env.ATTACHMENT_FOUND != '0' }}
+      run: |
+        curl -s \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer $GITHUB_TOKEN" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          -H "Content-Type: application/octet-stream" \
+          --data-binary "@checksum" \
+          $UPLOAD_URL

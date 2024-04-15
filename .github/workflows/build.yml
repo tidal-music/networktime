@@ -4,10 +4,36 @@ on:
     branches:
       - '**'
 jobs:
-  root:
+  generate-build-matrix:
     runs-on: macos-14-xlarge
+    outputs:
+      xcodeversions: ${{ steps.generate.outputs.xcodeversions }}
+    steps:
+      - id: generate
+        run: |
+          version_list=()
+          for XCODE_INSTALL in $(ls /Applications | grep Xcode); do
+            version_list+=("$(/usr/libexec/PlistBuddy -c "print CFBundleShortVersionString" /Applications/$XCODE_INSTALL/Contents/Info.plist)")
+          done
+          unique_version_list=( $(printf "%s\n" ${version_list[@]} | sort -n -u) )
+          jsonString="$(jq -c --null-input '$ARGS.positional' --args -- "${unique_version_list[@]}")"
+          echo "xcodeversions=$jsonString" >> $GITHUB_OUTPUT
+  build:
+    runs-on: macos-14-xlarge
+    needs: [ generate-build-matrix ]
+    strategy:
+      matrix:
+        xcodeversion: ${{ fromJSON(needs.generate-build-matrix.outputs.xcodeversions) }}
     steps:
       - uses: actions/checkout@v3.5.3
+      - uses: maxim-lobanov/setup-xcode@v1.6.0
+        with:
+          xcode-version: ${{ matrix.xcodeversion }}
       - uses: ./.github/actions/runGradleTask
         with:
           task: build
+  barrier-build:
+    runs-on: ubuntu-22.04
+    needs: [ build ]
+    steps:
+      - run: exit 0

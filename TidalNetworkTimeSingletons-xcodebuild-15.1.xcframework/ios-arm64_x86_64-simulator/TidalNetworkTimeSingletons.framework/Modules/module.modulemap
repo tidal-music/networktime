@@ -1,0 +1,6 @@
+framework module "TidalNetworkTimeSingletons" {
+    umbrella header "TidalNetworkTimeSingletons.h"
+
+    export *
+    module * { export * }
+}

@@ -33,4 +33,3 @@ jobs:
           .scripts/github/update_xcframeworks.sh
           git tag $TAG -m $TAG
           git push origin tag $TAG
-          gh workflow run publish.yml --ref $TAG

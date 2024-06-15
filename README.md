@@ -61,5 +61,5 @@ to be freely garbage-collected when applicable. `SNTPClient.singleton` is thread
 
 While using the core artifact instead is strongly recommended whenever possible, this one may be
 useful if your codebase requires exactly the same clock reference using exactly the same
-synchronization pacing across multiple places but it does not feature integration points between
+synchronization pacing across multiple places, but it does not feature integration points between
 these that allow you to share a single `SNTPClient` instance.

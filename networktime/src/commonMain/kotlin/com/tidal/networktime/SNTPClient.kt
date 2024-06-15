@@ -20,7 +20,6 @@ import kotlin.time.Duration.Companion.seconds
  * packet has been received and processed. If not `null` but writing or reading fail when attempted,
  * program execution will continue as if it had been `null` until the next attempt.
  */
-@ObjCName(name = "TNTSNTPClient", swiftName = "SNTPClient", exact = true)
 class SNTPClient(
   vararg val ntpServers: NTPServer,
   @ObjCName(name = "synchronizationIntervalMs")
@@ -36,7 +35,7 @@ class SNTPClient(
   /**
    * The calculated epoch time if it has been calculated at least once or null otherwise.
    */
-  @ObjCName("epochTimeMs")
+  @ObjCName(name = "epochTimeMs")
   val epochTime by delegate::epochTime
 
   /**

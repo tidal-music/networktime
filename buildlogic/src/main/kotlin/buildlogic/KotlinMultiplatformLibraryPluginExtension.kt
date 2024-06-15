@@ -29,7 +29,7 @@ open class KotlinMultiplatformLibraryPluginExtension @Inject constructor(
       ).forEach {
         it.binaries
           .framework {
-            baseName = xCFrameworkName
+            baseName = "TNT"
             binaryOption("bundleId", xCFrameworkName)
             binaryOption("bundleShortVersionString", version as String)
             binaryOption("bundleVersion", version as String)

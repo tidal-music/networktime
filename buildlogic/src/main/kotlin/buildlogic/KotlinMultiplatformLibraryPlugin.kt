@@ -66,10 +66,5 @@ internal class KotlinMultiplatformLibraryPlugin : Plugin<Project> {
       applyDefaultHierarchyTemplate()
       jvm()
     }
-    configure<KotlinProjectExtension> {
-      sourceSets.all {
-        languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
-      }
-    }
   }
 }

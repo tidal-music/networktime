@@ -16,6 +16,9 @@ kotlin {
       it.compilations.configureEach { cinterops.create("NetworkFrameworkWorkaround") }
     }
   sourceSets {
+    all {
+      languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
+    }
     commonMain.dependencies {
       implementation(libs.kotlinx.coroutines.core)
       implementation(libs.kotlinx.datetime)

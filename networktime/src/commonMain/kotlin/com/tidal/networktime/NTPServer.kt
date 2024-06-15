@@ -26,7 +26,6 @@ import kotlin.time.Duration.Companion.seconds
  * dispersion higher than this will be discarded.
  * @param dnsResolutionTimeout The timeout for DNS lookup for addresses from [hostName].
  */
-@ObjCName(name = "TNTNTPServer", swiftName = "NTPServer", exact = true)
 class NTPServer(
   val hostName: String,
   @ObjCName(name = "queryConnectTimeoutMs")

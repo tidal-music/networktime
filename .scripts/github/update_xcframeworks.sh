@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-XCODEBUILD_VERSIONS=("15.1" "15.3")
+XCODEBUILD_VERSIONS=("15.1" "15.4")
 
 for XCODEBUILD_VERSION in "${XCODEBUILD_VERSIONS[@]}"
 do

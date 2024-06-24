@@ -5,7 +5,7 @@ import Foundation
 import PackageDescription
 
 #if swift(>=5.10)
-  let xcodeBuildVersion = "15.3"
+  let xcodeBuildVersion = "15.4"
 #elseif swift(>=5.9)
   let xcodeBuildVersion = "15.1"
 #else

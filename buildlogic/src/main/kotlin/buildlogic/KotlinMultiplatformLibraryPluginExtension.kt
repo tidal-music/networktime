@@ -34,6 +34,7 @@ open class KotlinMultiplatformLibraryPluginExtension @Inject constructor(
             binaryOption("bundleShortVersionString", version as String)
             binaryOption("bundleVersion", version as String)
             isStatic = true
+            freeCompilerArgs += listOf("-module-name", "TNT")
             xCFramework.add(this)
           }
       }

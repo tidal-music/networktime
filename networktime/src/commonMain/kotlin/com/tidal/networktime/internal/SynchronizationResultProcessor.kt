@@ -1,5 +1,6 @@
 package com.tidal.networktime.internal
 
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.okio.decodeFromBufferedSource
@@ -30,6 +31,7 @@ internal class SynchronizationResultProcessor(
     }
     set(value) {
       mutableState.synchronizationResult = value
+      firstSynchronizationLock.unlock()
       if (backupFilePath != null && value != null) {
         try {
           fileSystem.write(backupFilePath) {
@@ -39,4 +41,6 @@ internal class SynchronizationResultProcessor(
         }
       }
     }
+
+  val firstSynchronizationLock = Mutex(locked = true)
 }

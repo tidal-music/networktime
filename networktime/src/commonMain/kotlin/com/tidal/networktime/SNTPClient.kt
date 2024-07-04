@@ -39,6 +39,12 @@ class SNTPClient(
   val epochTime by delegate::epochTime
 
   /**
+   * The calculated epoch time, blocking until it has been calculated at least once.
+   */
+  @ObjCName(name = "blockingEpochTimeMs")
+  suspend fun blockingEpochTime() = delegate.blockingEpochTime()
+
+  /**
    * Starts periodic synchronization. If it's already started, it does nothing. Otherwise, it
    * requests an immediate dispatch of a synchronization and subsequent ones
    * [synchronizationInterval] after each other.

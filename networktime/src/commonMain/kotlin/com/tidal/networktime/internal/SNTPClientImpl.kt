@@ -39,6 +39,13 @@ constructor(
       return synchronizedTime - synchronizedAt + referenceClock.referenceEpochTime
     }
 
+  suspend fun blockingEpochTime(): Duration {
+    epochTime?.let { return it }
+    synchronizationResultProcessor.firstSynchronizationLock
+      .lock()
+    return epochTime!!
+  }
+
   fun enableSynchronization() = operationCoordinator.dispatchStartSync()
 
   fun disableSynchronization() = operationCoordinator.dispatchStopSync()

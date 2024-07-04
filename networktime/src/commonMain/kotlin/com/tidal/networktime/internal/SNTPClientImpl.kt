@@ -42,7 +42,10 @@ constructor(
   suspend fun blockingEpochTime(): Duration {
     epochTime?.let { return it }
     synchronizationResultProcessor.firstSynchronizationLock
-      .lock()
+      .apply {
+        lock()
+        unlock()
+      }
     return epochTime!!
   }
 

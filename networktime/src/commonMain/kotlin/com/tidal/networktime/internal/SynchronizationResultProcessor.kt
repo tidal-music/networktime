@@ -30,8 +30,11 @@ internal class SynchronizationResultProcessor(
       return value
     }
     set(value) {
+      val oldValue = mutableState.synchronizationResult
       mutableState.synchronizationResult = value
-      firstSynchronizationLock.unlock()
+      if (oldValue == null && value != null) {
+        firstSynchronizationLock.unlock()
+      }
       if (backupFilePath != null && value != null) {
         try {
           fileSystem.write(backupFilePath) {

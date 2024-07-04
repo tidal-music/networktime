@@ -41,12 +41,15 @@ Version numbers can be found under [Releases](https://github.com/tidal-music/net
 ## Usage
 
 Create your `SNTPClient` via its constructor. Its API allows you to toggle synchronization (starts
-off) and to retrieve the time based on the latest successful synchronization, if any.
+off) and to retrieve the time based on the latest successful synchronization.
 
-The property that retrieves the aforementioned time is nullable as it will return `null` if no
+The nullable property `epochTime` retrieves the aforementioned time will return `null` if no
 synchronization has occurred successfully during the lifetime of the process and no backup file has
 been specified for the `SNTPClient` instance or said file contains no valid prior synchronization
 data.
+
+As an alternative, the `blockingEpochTime` method can be used to suspend the caller until a valid
+synchronization or backup restoration occurs to avoid a nullable return type.
 
 ## networktime-singletons
 

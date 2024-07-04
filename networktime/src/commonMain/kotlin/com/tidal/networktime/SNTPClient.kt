@@ -39,7 +39,8 @@ class SNTPClient(
   val epochTime by delegate::epochTime
 
   /**
-   * The calculated epoch time, blocking until it has been calculated at least once.
+   * The calculated epoch time. Suspends the caller until said time has been calculated at least
+   * once.
    */
   @ObjCName(name = "blockingEpochTimeMs")
   suspend fun blockingEpochTime() = delegate.blockingEpochTime()

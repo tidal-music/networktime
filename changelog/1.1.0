@@ -1,0 +1,1 @@
+Add new symbol SNTPClient.blockingEpochTime as a variant of blockingEpochTime that ensures at least one synchronization has been performed before returning.

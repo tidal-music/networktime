@@ -1,0 +1,6 @@
+framework module "TidalNetworkTime" {
+    umbrella header "TidalNetworkTime.h"
+
+    export *
+    module * { export * }
+}

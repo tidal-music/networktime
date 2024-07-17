@@ -12,6 +12,7 @@ open class KotlinMultiplatformLibraryPluginExtension @Inject constructor(
   private val project: Project,
   objectFactory: ObjectFactory,
 ) {
+  val androidNamespaceSuffix: Property<String> = objectFactory.property(String::class.java)
   val pomDescription: Property<String> = objectFactory.property(String::class.java)
 
   fun xCFramework(xCFrameworkName: String) = with(project) {

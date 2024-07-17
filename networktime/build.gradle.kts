@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -11,6 +12,12 @@ buildlogicKotlinMultiplatformLibrary {
 }
 
 kotlin {
+  androidTarget {
+    compilerOptions {
+      jvmTarget.set(JvmTarget.JVM_1_8)
+    }
+    publishLibraryVariants("release")
+  }
   targets.filterIsInstance<KotlinNativeTarget>()
     .forEach {
       it.compilations.configureEach { cinterops.create("NetworkFrameworkWorkaround") }

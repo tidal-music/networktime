@@ -1,5 +1,6 @@
 package buildlogic
 
+import com.android.build.api.dsl.LibraryExtension
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
@@ -8,6 +9,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.configure
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
@@ -18,6 +20,12 @@ internal class KotlinMultiplatformLibraryPlugin : Plugin<Project> {
       KotlinMultiplatformLibraryPluginExtension::class.java,
     )
     val libs = extensions.getByType(VersionCatalogsExtension::class.java).named("libs")
+    pluginManager.apply(
+      libs.findPlugin("android-library")
+        .get()
+        .get()
+        .pluginId,
+    )
     pluginManager.apply(
       libs.findPlugin("kotlin-multiplatform")
         .get()
@@ -31,6 +39,27 @@ internal class KotlinMultiplatformLibraryPlugin : Plugin<Project> {
         .pluginId,
     )
     group = "com.tidal.networktime"
+    configure<KotlinMultiplatformExtension> {
+      applyDefaultHierarchyTemplate()
+      androidTarget {
+        compilerOptions {
+          jvmTarget.set(JvmTarget.JVM_1_8)
+        }
+        publishLibraryVariants("release")
+      }
+      jvm()
+      sourceSets.androidMain.get().dependsOn(sourceSets.jvmMain.get())
+    }
+    configure<KotlinProjectExtension> {
+      sourceSets.all {
+        languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
+      }
+    }
+    configure<LibraryExtension> {
+      compileSdk = 34
+      defaultConfig.minSdk = 26
+      namespace = "com.tidal.networktime${customExtension.androidNamespaceSuffix.getOrElse("")}"
+    }
     configure<MavenPublishBaseExtension> {
       pom {
         name.set(project.name)
@@ -61,15 +90,6 @@ internal class KotlinMultiplatformLibraryPlugin : Plugin<Project> {
       configure(KotlinMultiplatform(JavadocJar.Empty(), true))
       signAllPublications()
       publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, true)
-    }
-    configure<KotlinMultiplatformExtension> {
-      applyDefaultHierarchyTemplate()
-      jvm()
-    }
-    configure<KotlinProjectExtension> {
-      sourceSets.all {
-        languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
-      }
     }
   }
 }

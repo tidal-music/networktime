@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
   compileOnly(gradleApi())
+  implementation(libs.plugin.android.build)
   implementation(libs.plugin.kotlin)
   implementation(libs.plugin.vanniktech.publish)
 }

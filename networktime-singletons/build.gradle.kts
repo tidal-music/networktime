@@ -4,6 +4,7 @@ plugins {
 }
 
 buildlogicKotlinMultiplatformLibrary {
+  androidNamespaceSuffix = ".singletons"
   pomDescription = "Singleton API extension."
   xCFramework("TidalNetworkTimeSingletons")
 }

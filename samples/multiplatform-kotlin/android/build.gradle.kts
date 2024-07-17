@@ -26,9 +26,6 @@ kotlin {
 
 android {
   compileSdk = 34
-  defaultConfig {
-    minSdk = 26
-    targetSdk = 34
-  }
+  defaultConfig.minSdk = 26
   namespace = "com.tidal.networktime.sample.android"
 }
